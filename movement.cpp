@@ -58,6 +58,10 @@ void c_movement::auto_strafe()
 	if (HACKS->cmd->buttons.has(IN_SPEED))
 		return;
 
+	float horizontal_speed = HACKS->local->velocity().length_2d(); //pokusaj broj 1
+	if (horizontal_speed < 10.f)
+		return;
+
 	auto holding_w = HACKS->cmd->buttons.has(IN_FORWARD);
 	auto holding_a = HACKS->cmd->buttons.has(IN_MOVELEFT);
 	auto holding_s = HACKS->cmd->buttons.has(IN_BACK);
@@ -69,6 +73,9 @@ void c_movement::auto_strafe()
 	velocity.z = 0.f;
 
 	auto speed = velocity.length();
+	/*if (speed < 15.f) // jebes ovo idemo drugacije
+		return;*/
+
 	auto ideal_strafe = (speed > 5.f) ? RAD2DEG(std::asin(15.f / speed)) : 90.f;
 	ideal_strafe *= 1.f - (g_cfg.misc.strafe_smooth * 0.01f);
 

@@ -62,7 +62,7 @@ void c_hacks::init_main(LPVOID reserved)
 void c_hacks::init(LPVOID reserved)
 {
 #ifdef _DEBUG
-	//create_console();
+	create_console(); // jebes ovo
 
 	DEBUG_LOG("Welcome to debug mode \n");
 	DEBUG_LOG("Build date: %s \n\n", __DATE__);
@@ -140,7 +140,7 @@ void c_hacks::init(LPVOID reserved)
 		engine->execute_client_cmd("cl_fullupdate");
 #endif
 
-	DEBUG_LOG("Hack was injected successfuly! \n");
+	DEBUG_LOG("Pummed debug loaded successfully! \n");
 
 #ifdef _DEBUG
 	while (!unload)
