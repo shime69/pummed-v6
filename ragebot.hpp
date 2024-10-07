@@ -162,19 +162,19 @@ private:
 
 	const table_t knife_dmg{ { { { 25, 90 }, { 21, 76 } }, { { 40, 90 }, { 34, 76 } } }, { { 65, 180 }, { 55, 153 } } };
 	std::array<vec3_t, 12 > knife_ang
-	{ 
-		vec3_t{ 0.f, 0.f, 0.f }, 
-		vec3_t{ 0.f, -90.f, 0.f }, 
+	{
+		vec3_t{ 0.f, 0.f, 0.f },
+		vec3_t{ 0.f, -90.f, 0.f },
 		vec3_t{ 0.f, 90.f, 0.f },
-		vec3_t{ 0.f, 180.f, 0.f }, 
-		vec3_t{ -80.f, 0.f, 0.f }, 
+		vec3_t{ 0.f, 180.f, 0.f },
+		vec3_t{ -80.f, 0.f, 0.f },
 		vec3_t{ -80.f, -90.f, 0.f },
-		vec3_t{ -80.f, 90.f, 0.f }, 
+		vec3_t{ -80.f, 90.f, 0.f },
 		vec3_t{ -80.f, 180.f, 0.f },
-		vec3_t{ 80.f, 0.f, 0.f }, 
-		vec3_t{ 80.f, -90.f, 0.f }, 
-		vec3_t{ 80.f, 90.f, 0.f }, 
-		vec3_t{ 80.f, 180.f, 0.f } 
+		vec3_t{ 80.f, 0.f, 0.f },
+		vec3_t{ 80.f, -90.f, 0.f },
+		vec3_t{ 80.f, 90.f, 0.f },
+		vec3_t{ 80.f, 180.f, 0.f }
 	};
 
 	void update_hitboxes();
@@ -211,6 +211,8 @@ public:
 	bool working{};
 	bool revolver_fire{};
 	int missed_shots[65]{};
+	int m_missed_anim_side[65]{};
+	int m_missed_prev_side[65]{};
 	rage_player_t best_rage_player{};
 	rage_weapon_t rage_config{};
 
@@ -277,6 +279,9 @@ public:
 			i.reset();
 
 		for (auto& i : missed_shots)
+			i = 0;
+
+		for (auto& i : m_missed_anim_side)
 			i = 0;
 
 		rage_config = {};
