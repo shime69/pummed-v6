@@ -2,6 +2,14 @@
 #include "server_bones.hpp"
 #include "engine_prediction.hpp"
 
+enum simulate_side_t
+{
+	side_left = -1,
+	side_zero,
+	side_right,
+	side_original,
+};
+
 struct matrix_t
 {
 	c_bone_builder bone_builder{};
@@ -35,6 +43,7 @@ struct anim_record_t
 	bool shooting{};
 	bool extrapolated{};
 	bool fakewalking{};
+	bool fix_jitter_angle{};
 
 	int server_tick_estimation{};
 	int extrapolate_ticks{};
@@ -46,6 +55,10 @@ struct anim_record_t
 	float sim_time{};
 	float old_sim_time{};
 	float last_shot_time{};
+	float last_eyeang_diff{};
+	float last_eyeang_diff_time{};
+	float last_eyeang{};
+	float old_diff{};
 	float anim_speed{};
 	float jitter_diff{};
 	float old_jitter_diff{};
@@ -70,15 +83,11 @@ struct anim_record_t
 	std::uint32_t ground_entity{};
 	c_animation_layers layers[13]{};
 
-	// hardcoded shit
-	c_animation_layers layers_orig[13]{};
-	c_animation_layers layers_left[13]{};
-	c_animation_layers layers_right[13]{};
-	c_animation_layers layers_low[13]{};
-
+#ifndef LEGACY
 	matrix_t matrix_left{};
 	matrix_t matrix_right{};
 	matrix_t matrix_zero{};
+#endif
 
 	matrix_t matrix_orig{};
 
@@ -123,13 +132,15 @@ struct anim_record_t
 		eye_angles = player->eye_angles();
 		walking = player->is_walking();
 		strafing = player->strafing();
+#ifndef LEGACY
 		collision_change_time = player->collision_change_time();
 		collision_change_origin = player->collision_change_origin();
+#endif
 		lby = player->lower_body_yaw();
 		thirdperson_recoil = player->thirdperson_recoil();
 		view_offset = player->view_offset();
 		abs_angles = player->get_abs_angles();
-		
+
 		auto simulation_tick = TIME_TO_TICKS(sim_time);
 		auto old_simulation_tick = TIME_TO_TICKS(old_sim_time);
 
@@ -189,6 +200,7 @@ struct anim_record_t
 		break_lc = false;
 		shooting = false;
 		fakewalking = false;
+		fix_jitter_angle = false;
 
 		choke = 0;
 		extrapolate_ticks = 0;
@@ -205,6 +217,10 @@ struct anim_record_t
 		collision_change_time = 0.f;
 		collision_change_origin = 0.f;
 		last_shot_time = 0.f;
+		last_eyeang_diff = 0.f;
+		old_diff = 0.f;
+		last_eyeang = 0.f;
+		last_eyeang_diff_time = 0.f;
 		lby = 0.f;
 		thirdperson_recoil = 0.f;
 
@@ -223,9 +239,11 @@ struct anim_record_t
 
 		std::memset(layers, 0, sizeof(layers));
 
+#ifndef LEGACY
 		matrix_left.reset();
 		matrix_right.reset();
 		matrix_zero.reset();
+#endif
 		matrix_orig.reset();
 
 		std::memset(predicted_matrix, 0, sizeof(predicted_matrix));
@@ -269,9 +287,9 @@ struct anims_t
 		dormant_ticks = 0;
 		old_spawn_time = 0.f;
 		old_aliveloop_cycle = 0.f;
-		old_aliveloop_rate = 0.f;
 		old_simulation_time = 0.f;
 		old_simulation_time2 = 0.f;
+		old_aliveloop_rate = 0.f;
 		dt_interpolation_fraction = 0.f;
 		last_valid_time = 0.f;
 
@@ -325,7 +343,6 @@ struct local_anims_t
 	float max_desync_range{};
 	float last_lby_time{};
 	float lby_angle{};
-	float poses{};
 
 	vec3_t eye_pos{};
 	vec3_t sent_eye_pos{};
@@ -356,7 +373,6 @@ struct local_anims_t
 		max_desync_range = 0.f;
 		last_lby_time = 0.f;
 		lby_angle = 0.f;
-		poses = 0.f;
 
 		eye_pos.reset();
 		sent_eye_pos.reset();
@@ -415,6 +431,8 @@ public:
 	}
 
 	void update_enemies();
+	void handle_jump_animations(c_animation_state* state, c_animation_layers* layers, c_user_cmd* cmd);
+	void handle_strafing(c_animation_state* state, c_user_cmd* cmd);
 	void update_local();
 	vec3_t get_eye_position(float angle);
 	void render_matrices(c_cs_player* player);

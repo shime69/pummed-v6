@@ -60,7 +60,7 @@ ecx: %08X
 edx: %08X
 -------------
 
-Press CTRL+C and send info to forum.)#"), ex->ExceptionRecord->ExceptionCode, ex->ExceptionRecord->ExceptionAddress,
+Press CTRL+C and send info to our discord server.)#"), ex->ExceptionRecord->ExceptionCode, ex->ExceptionRecord->ExceptionAddress,
 mod == (HMODULE)cheat_module ? CXOR("Pummed v6") : module_name, bytes,
 ex->ContextRecord->Eax, ex->ContextRecord->Ebx, ex->ContextRecord->Ecx, ex->ContextRecord->Edx);
 

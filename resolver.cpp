@@ -3,80 +3,43 @@
 #include "animations.hpp"
 #include "server_bones.hpp"
 #include "ragebot.hpp"
-#include <numeric>
+#include "penetration.hpp"
 
 namespace resolver
 {
 	inline void prepare_jitter(c_cs_player* player, resolver_info_t& resolver_info, anim_record_t* current)
 	{
 		auto& jitter = resolver_info.jitter;
-		auto diff = math::angle_diff(player->eye_angles().y, current->eye_angles.y);
+		jitter.yaw_cache[jitter.yaw_cache_offset % YAW_CACHE_SIZE] = current->eye_angles.y;
 
-		jitter.angles.push_back(diff);
-		if (jitter.angles.size() > 5)
-			jitter.angles.pop_front();
-
-		jitter.is_jitter = false;
-		if (jitter.angles.size() >= 3)
-		{
-			float avg = std::accumulate(jitter.angles.begin(), jitter.angles.end(), 0.0f) / jitter.angles.size();
-			float variance = 0.0f;
-			for (const auto& angle : jitter.angles)
-				variance += std::pow(angle - avg, 2);
-			variance /= jitter.angles.size();
-
-			jitter.is_jitter = variance > 15.0f;
-		}
-
-		if (jitter.is_jitter)
-			jitter.jitter_side = diff > 0 ? 1 : -1;
-	}
-
-	inline void freestand_resolve(c_cs_player* player, resolver_info_t& resolver_info)
-	{
-		constexpr float RANGE = 32.f;
-
-		vec3_t src = player->get_eye_position();
-		vec3_t forward, right, up;
-		math::angle_vectors(player->eye_angles(), &forward, &right, &up);
-
-		vec3_t left_end = src + (right * -RANGE);
-		vec3_t right_end = src + (right * RANGE);
-
-		float left_fraction = 0.f, right_fraction = 0.f;
-		 
-		for (float i = 0.f; i < 1.f; i += 0.1f)
-		{
-			vec3_t left_point = src + (left_end - src) * i;
-			vec3_t right_point = src + (right_end - src) * i;
-
-			c_game_trace left_trace, right_trace;
-			ray_t left_ray, right_ray;
-
-			left_ray.init(left_point, left_point + forward * 100.f);
-			right_ray.init(right_point, right_point + forward * 100.f);
-
-			HACKS->engine_trace->trace_ray(left_ray, MASK_SHOT_HULL | CONTENTS_HITBOX, nullptr, &left_trace);
-			HACKS->engine_trace->trace_ray(right_ray, MASK_SHOT_HULL | CONTENTS_HITBOX, nullptr, &right_trace);
-
-			left_fraction += left_trace.fraction;
-			right_fraction += right_trace.fraction;
-		}
-
-		if (left_fraction > right_fraction)
-			resolver_info.side = 1;
-		else if (right_fraction > left_fraction)
-			resolver_info.side = -1;
+		if (jitter.yaw_cache_offset >= YAW_CACHE_SIZE + 1)
+			jitter.yaw_cache_offset = 0;
 		else
-			resolver_info.side = 0;
+			jitter.yaw_cache_offset++;
 
-		resolver_info.mode = XOR("freestand");
-		resolver_info.resolved = true;
-		resolver_info.freestanding.updated = true;
-		resolver_info.freestanding.update_time = HACKS->global_vars->curtime;
+		for (int i = 0; i < YAW_CACHE_SIZE - 1; ++i)
+		{
+			float diff = std::fabsf(jitter.yaw_cache[i] - jitter.yaw_cache[i + 1]);
+			if (diff <= 0.f)
+			{
+				if (jitter.static_ticks < 3)
+					jitter.static_ticks++;
+				else
+					jitter.jitter_ticks = 0;
+			}
+			else if (diff >= 20.f)
+			{
+				if (jitter.jitter_ticks < 3)
+					jitter.jitter_ticks++;
+				else
+					jitter.static_ticks = 0;
+			}
+		}
+
+		jitter.is_jitter = jitter.jitter_ticks > jitter.static_ticks;
 	}
 
-	inline void prepare_side(c_cs_player* player, anim_record_t* current, anim_record_t* last)
+	inline void prepare_side(c_cs_player* player, anim_record_t* current, anim_record_t* previous)
 	{
 		auto& info = resolver_info[player->index()];
 		if (!HACKS->weapon_info || !HACKS->local || !HACKS->local->is_alive() || player->is_bot() || !g_cfg.rage.resolver)
@@ -116,53 +79,95 @@ namespace resolver
 		auto& jitter = info.jitter;
 		if (jitter.is_jitter)
 		{
-			info.side = jitter.jitter_side;
+			auto& misses = RAGEBOT->missed_shots[player->index()];
+			if (misses > 0)
+				info.side = side_original;
+			else
+			{
+
+				float first_angle = math::normalize_yaw(jitter.yaw_cache[YAW_CACHE_SIZE - 1]);
+				float second_angle = math::normalize_yaw(jitter.yaw_cache[YAW_CACHE_SIZE - 2]);
+
+				float _first_angle = std::sin(DEG2RAD(first_angle));
+				float _second_angle = std::sin(DEG2RAD(second_angle));
+
+				float __first_angle = std::cos(DEG2RAD(first_angle));
+				float __second_angle = std::cos(DEG2RAD(second_angle));
+
+
+				float avg_yaw = math::normalize_yaw(RAD2DEG(std::atan2f((_first_angle + _second_angle), (__first_angle + __second_angle))));
+				float diff = math::normalize_yaw(current->eye_angles.y - avg_yaw);
+
+				info.side = diff > 0.f ? side_left : side_right;
+
+			}
+
 			info.resolved = true;
 			info.mode = XOR("jitter");
 		}
+
+		if (previous)
+		{
+			if (static_cast<int>(current->layers[6].weight * 1500.f) == static_cast<int>(previous->layers[6].weight * 1000.f))
+			{
+				const auto& cur_layer6 = current->layers[6];
+
+				const auto zero_delta = std::abs(cur_layer6.playback_rate - current->matrix_zero.layers[6].playback_rate);
+				const auto left_delta = std::abs(cur_layer6.playback_rate - current->matrix_left.layers[6].playback_rate);
+				const auto right_delta = std::abs(cur_layer6.playback_rate - current->matrix_right.layers[6].playback_rate);
+
+				const auto min_delta = std::min(zero_delta, std::min(left_delta, right_delta));
+
+				if (static_cast<int>(min_delta * 1000.f) == static_cast<int>(left_delta * 1000.f))
+				{
+					info.anim_resolve_ticks = HACKS->global_vars->tickcount;
+
+					info.resolved = true;
+					info.mode = XOR("layers");
+					info.side = side_left;
+				}
+				else if (static_cast<int>(min_delta * 1000.f) == static_cast<int>(right_delta * 1000.f))
+				{
+					info.anim_resolve_ticks = HACKS->global_vars->tickcount;
+
+					info.resolved = true;
+					info.mode = XOR("layers");
+					info.side = side_right;
+				}
+			}
+		}
+
 		else
 		{
 			auto& misses = RAGEBOT->missed_shots[player->index()];
 			if (misses > 0)
 			{
-				switch (misses % 4)
-				{
-				case 1:
-					info.side = -1;
-					break;
-				case 2:
-					info.side = 1;
-					break;
-				case 3:
-					freestand_resolve(player, info);
-					break;
-				case 0:
-					info.side = 0;
-					break;
-				}
+				info.side = math::random_float(side_left, side_right);
 
 				info.resolved = true;
-				if (info.mode != XOR("freestand"))
-					info.mode = XOR("brute");
+				info.mode = XOR("brute");
 			}
 			else
 			{
-				freestand_resolve(player, info);
+				info.side = side_zero;
+				info.mode = XOR("static");
+
+				info.resolved = true;
 			}
 		}
+
 	}
 
 	inline void apply_side(c_cs_player* player, anim_record_t* current, int choke)
 	{
 		auto& info = resolver_info[player->index()];
-		if (!HACKS->weapon_info || !HACKS->local || !HACKS->local->is_alive() || !info.resolved || info.side == 1337 || player->is_teammate(false))
+		if (!HACKS->weapon_info || !HACKS->local || !HACKS->local->is_alive() || !info.resolved || info.side == side_original || player->is_teammate(false))
 			return;
 
 		auto state = player->animstate();
 		if (!state)
 			return;
 
-		float desync_angle = state->get_max_rotation();
-		state->abs_yaw = math::normalize_yaw(player->eye_angles().y + desync_angle * info.side);
+		state->abs_yaw = math::normalize_yaw(player->eye_angles().y + state->get_max_rotation() * info.side);
 	}
 }
