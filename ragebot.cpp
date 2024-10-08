@@ -1772,9 +1772,13 @@ void c_ragebot::proceed_misses()
 						else if (resolver_info.resolved)
 						{
 							missed_shots[shot.index]++;
-							m_missed_prev_side[shot.index] = m_missed_anim_side[shot.index];
-							m_missed_anim_side[shot.index] = resolver_info.side;
+							//m_missed_prev_side[shot.index] = m_missed_anim_side[shot.index];
+							//m_missed_anim_side[shot.index] = resolver_info.side;
 							EVENT_LOGS->push_message(XOR("Missed shot due to resolver"));
+						}
+						else
+						{
+							EVENT_LOGS->push_message(XOR("Missed shot due to ?"));
 						}
 					}
 					else
