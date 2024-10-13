@@ -27,7 +27,7 @@ class c_hacks;
 #include <windows.h>
 #include <libs.h>
 #include <d3d9.h>
-#include <d3dx9.h>
+#include "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\d3dx9.h" // izdebilisalo se i nije htelo da radi prvi put sad radi
 #include <math.h>
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
