@@ -1,4 +1,196 @@
+// new resolver
 #include "globals.hpp"
+#include "resolver.hpp"
+#include "animations.hpp"
+#include "server_bones.hpp"
+#include "ragebot.hpp"
+#include "penetration.hpp"
+
+namespace resolver
+{
+    constexpr int MAX_STATIC_TICKS = 3;
+    constexpr int MAX_JITTER_TICKS = 3;
+    constexpr float JITTER_THRESHOLD = 20.f;
+
+    inline void update_yaw_cache(resolver_info_t::jitter_info_t& jitter, float current_yaw)
+    {
+        jitter.yaw_cache[jitter.yaw_cache_offset % YAW_CACHE_SIZE] = current_yaw;
+        jitter.yaw_cache_offset = (jitter.yaw_cache_offset + 1) % (YAW_CACHE_SIZE + 1);
+    }
+
+    inline void analyze_yaw_differences(resolver_info_t::jitter_info_t& jitter)
+    {
+        for (int i = 0; i < YAW_CACHE_SIZE - 1; ++i)
+        {
+            float diff = std::fabsf(jitter.yaw_cache[i] - jitter.yaw_cache[i + 1]);
+            if (diff <= 0.f)
+            {
+                jitter.static_ticks = std::min(jitter.static_ticks + 1, MAX_STATIC_TICKS);
+                jitter.jitter_ticks = 0;
+            }
+            else if (diff >= JITTER_THRESHOLD)
+            {
+                jitter.jitter_ticks = std::min(jitter.jitter_ticks + 1, MAX_JITTER_TICKS);
+                jitter.static_ticks = 0;
+            }
+        }
+    }
+
+    inline void prepare_jitter(c_cs_player* player, resolver_info_t& resolver_info, anim_record_t* current)
+    {
+        auto& jitter = resolver_info.jitter;
+        update_yaw_cache(jitter, current->eye_angles.y);
+        analyze_yaw_differences(jitter);
+        jitter.is_jitter = jitter.jitter_ticks > jitter.static_ticks;
+    }
+
+    inline float calculate_average_yaw(const resolver_info_t::jitter_info_t& jitter)
+    {
+        float first_angle = math::normalize_yaw(jitter.yaw_cache[YAW_CACHE_SIZE - 1]);
+        float second_angle = math::normalize_yaw(jitter.yaw_cache[YAW_CACHE_SIZE - 2]);
+
+        float sin_sum = std::sin(DEG2RAD(first_angle)) + std::sin(DEG2RAD(second_angle));
+        float cos_sum = std::cos(DEG2RAD(first_angle)) + std::cos(DEG2RAD(second_angle));
+
+        return math::normalize_yaw(RAD2DEG(std::atan2f(sin_sum, cos_sum)));
+    }
+
+    inline void resolve_jitter(resolver_info_t& info, const resolver_info_t::jitter_info_t& jitter, anim_record_t* current)
+    {
+        auto& misses = RAGEBOT->missed_shots[info.player_index];
+        if (misses > 0)
+        {
+            info.side = side_original;
+        }
+        else
+        {
+            float avg_yaw = calculate_average_yaw(jitter);
+            float diff = math::normalize_yaw(current->eye_angles.y - avg_yaw);
+            info.side = diff > 0.f ? side_left : side_right;
+        }
+
+        info.resolved = true;
+        info.mode = XOR("jitter");
+    }
+
+    inline void resolve_layers(resolver_info_t& info, anim_record_t* current, anim_record_t* previous)
+    {
+        if (static_cast<int>(current->layers[6].weight * 1500.f) == static_cast<int>(previous->layers[6].weight * 1000.f))
+        {
+            const auto& cur_layer6 = current->layers[6];
+
+            const auto zero_delta = std::abs(cur_layer6.playback_rate - current->matrix_zero.layers[6].playback_rate);
+            const auto left_delta = std::abs(cur_layer6.playback_rate - current->matrix_left.layers[6].playback_rate);
+            const auto right_delta = std::abs(cur_layer6.playback_rate - current->matrix_right.layers[6].playback_rate);
+
+            const auto min_delta = std::min({zero_delta, left_delta, right_delta});
+
+            if (static_cast<int>(min_delta * 1000.f) == static_cast<int>(left_delta * 1000.f))
+            {
+                info.anim_resolve_ticks = HACKS->global_vars->tickcount;
+                info.resolved = true;
+                info.mode = XOR("layers");
+                info.side = side_left;
+            }
+            else if (static_cast<int>(min_delta * 1000.f) == static_cast<int>(right_delta * 1000.f))
+            {
+                info.anim_resolve_ticks = HACKS->global_vars->tickcount;
+                info.resolved = true;
+                info.mode = XOR("layers");
+                info.side = side_right;
+            }
+        }
+    }
+
+    inline void resolve_brute_force(resolver_info_t& info)
+    {
+        auto& misses = RAGEBOT->missed_shots[info.player_index];
+        if (misses > 0)
+        {
+            info.side = (rand() % 2 == 0) ? side_left : side_right;
+            info.resolved = true;
+            info.mode = XOR("brute");
+        }
+        else
+        {
+            info.side = side_zero;
+            info.mode = XOR("static");
+            info.resolved = true;
+        }
+    }
+
+    inline void update_tick_count(resolver_info_t& info, anim_record_t* current)
+    {
+        if (current->choke < 2)
+            info.add_legit_ticks();
+        else
+            info.add_fake_ticks();
+    }
+
+    inline bool should_resolve(c_cs_player* player, const resolver_info_t& info)
+    {
+        return HACKS->weapon_info && HACKS->local && HACKS->local->is_alive() && !player->is_bot() && g_cfg.rage.resolver;
+    }
+
+    void prepare_side(c_cs_player* player, anim_record_t* current, anim_record_t* previous)
+    {
+        auto& info = resolver_info[player->index()];
+        info.player_index = player->index();
+
+        if (!should_resolve(player, info))
+        {
+            info.reset();
+            return;
+        }
+
+        update_tick_count(info, current);
+
+        if (info.is_legit())
+        {
+            info.resolved = false;
+            info.mode = XOR("no fake");
+            return;
+        }
+
+        prepare_jitter(player, info, current);
+
+        if (info.jitter.is_jitter)
+        {
+            resolve_jitter(info, info.jitter, current);
+        }
+        else if (previous)
+        {
+            resolve_layers(info, current, previous);
+        }
+        else
+        {
+            resolve_brute_force(info);
+        }
+    }
+
+    inline bool should_apply_side(c_cs_player* player, const resolver_info_t& info)
+    {
+        return HACKS->weapon_info && HACKS->local && HACKS->local->is_alive() && 
+               info.resolved && info.side != side_original && !player->is_teammate(false);
+    }
+
+    void apply_side(c_cs_player* player, anim_record_t* current, int choke)
+    {
+        auto& info = resolver_info[player->index()];
+        if (!should_apply_side(player, info))
+            return;
+
+        auto state = player->animstate();
+        if (!state)
+            return;
+
+        state->abs_yaw = math::normalize_yaw(player->eye_angles().y + state->get_max_rotation() * info.side);
+    }
+}
+
+
+// old resolver
+/*#include "globals.hpp"
 #include "resolver.hpp"
 #include "animations.hpp"
 #include "server_bones.hpp"
@@ -170,4 +362,4 @@ namespace resolver
 
 		state->abs_yaw = math::normalize_yaw(player->eye_angles().y + state->get_max_rotation() * info.side);
 	}
-}
+}*/

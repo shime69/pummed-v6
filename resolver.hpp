@@ -15,6 +15,7 @@ struct resolver_info_t
 
 	int legit_ticks{};
 	int fake_ticks{};
+	int player_index{};
 
 	int anim_resolve_ticks{};
 
@@ -171,6 +172,10 @@ namespace resolver
 			i.reset();
 	}
 
-	extern void prepare_side(c_cs_player* player, anim_record_t* current, anim_record_t* last);
-	extern void apply_side(c_cs_player* player, anim_record_t* current, int choke);
-}
+	bool should_resolve(c_cs_player* player, const resolver_info_t& info);
+	void prepare_side(c_cs_player* player, anim_record_t* current, anim_record_t* previous);
+	void apply_side(c_cs_player* player, anim_record_t* current, int choke);
+
+	void update_tick_count(resolver_info_t& info, anim_record_t* current);
+	bool should_apply_side(c_cs_player* player, const resolver_info_t& info);
+};
