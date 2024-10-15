@@ -26,10 +26,10 @@ std::string get_bind_type(int type)
 		return CXOR("[always on]");
 		break;
 	case 1:
-		return CXOR("[on hold]");
+		return CXOR("[hold]");
 		break;
 	case 2:
-		return CXOR("[on toggle]");
+		return CXOR("[toggle]");
 		break;
 	}
 	return "";
