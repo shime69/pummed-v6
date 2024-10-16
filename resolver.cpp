@@ -10,15 +10,15 @@ namespace resolver
 {
     constexpr int MAX_STATIC_TICKS = 3;
     constexpr int MAX_JITTER_TICKS = 3;
-    constexpr float JITTER_THRESHOLD = 20.f;
+    constexpr float JITTER_THRESHOLD = 20.f; //real?!?!
 
-    inline void update_yaw_cache(resolver_info_t::jitter_info_t& jitter, float current_yaw)
+    inline static void update_yaw_cache(resolver_info_t::jitter_info_t& jitter, float current_yaw)
     {
         jitter.yaw_cache[jitter.yaw_cache_offset % YAW_CACHE_SIZE] = current_yaw;
         jitter.yaw_cache_offset = (jitter.yaw_cache_offset + 1) % (YAW_CACHE_SIZE + 1);
     }
 
-    inline void analyze_yaw_differences(resolver_info_t::jitter_info_t& jitter)
+    inline static void analyze_yaw_differences(resolver_info_t::jitter_info_t& jitter)
     {
         for (int i = 0; i < YAW_CACHE_SIZE - 1; ++i)
         {
@@ -36,7 +36,7 @@ namespace resolver
         }
     }
 
-    inline void prepare_jitter(c_cs_player* player, resolver_info_t& resolver_info, anim_record_t* current)
+    inline static void prepare_jitter(c_cs_player* player, resolver_info_t& resolver_info, anim_record_t* current)
     {
         auto& jitter = resolver_info.jitter;
         update_yaw_cache(jitter, current->eye_angles.y);
@@ -44,7 +44,7 @@ namespace resolver
         jitter.is_jitter = jitter.jitter_ticks > jitter.static_ticks;
     }
 
-    inline float calculate_average_yaw(const resolver_info_t::jitter_info_t& jitter)
+    inline static float calculate_average_yaw(const resolver_info_t::jitter_info_t& jitter)
     {
         float first_angle = math::normalize_yaw(jitter.yaw_cache[YAW_CACHE_SIZE - 1]);
         float second_angle = math::normalize_yaw(jitter.yaw_cache[YAW_CACHE_SIZE - 2]);
@@ -55,7 +55,7 @@ namespace resolver
         return math::normalize_yaw(RAD2DEG(std::atan2f(sin_sum, cos_sum)));
     }
 
-    inline void resolve_jitter(resolver_info_t& info, const resolver_info_t::jitter_info_t& jitter, anim_record_t* current)
+    inline static void resolve_jitter(resolver_info_t& info, const resolver_info_t::jitter_info_t& jitter, anim_record_t* current)
     {
         auto& misses = RAGEBOT->missed_shots[info.player_index];
         if (misses > 0)
@@ -73,7 +73,7 @@ namespace resolver
         info.mode = XOR("jitter");
     }
 
-    inline void resolve_layers(resolver_info_t& info, anim_record_t* current, anim_record_t* previous)
+    inline static void resolve_layers(resolver_info_t& info, anim_record_t* current, anim_record_t* previous)
     {
         if (static_cast<int>(current->layers[6].weight * 1500.f) == static_cast<int>(previous->layers[6].weight * 1000.f))
         {
@@ -102,7 +102,7 @@ namespace resolver
         }
     }
 
-    inline void resolve_brute_force(resolver_info_t& info)
+    inline static void resolve_brute_force(resolver_info_t& info)
     {
         auto& misses = RAGEBOT->missed_shots[info.player_index];
         if (misses > 0)
@@ -129,7 +129,7 @@ namespace resolver
 
     inline bool should_resolve(c_cs_player* player, const resolver_info_t& info)
     {
-        return HACKS->weapon_info && HACKS->local && HACKS->local->is_alive() && !player->is_bot() && g_cfg.rage.resolver;
+        return HACKS->weapon_info && HACKS->local && HACKS->local->is_alive() && g_cfg.rage.resolver; //!player->is_bot()
     }
 
     void prepare_side(c_cs_player* player, anim_record_t* current, anim_record_t* previous)
