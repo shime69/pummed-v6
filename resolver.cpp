@@ -10,7 +10,7 @@ namespace resolver
 {
     constexpr int MAX_STATIC_TICKS = 3;
     constexpr int MAX_JITTER_TICKS = 3;
-    constexpr float JITTER_THRESHOLD = 20.f; //real?!?!
+    constexpr float DEFAULT_JITTER_THRESHOLD = 20.f;
 
     inline static void update_yaw_cache(resolver_info_t::jitter_info_t& jitter, float current_yaw)
     {
@@ -18,8 +18,21 @@ namespace resolver
         jitter.yaw_cache_offset = (jitter.yaw_cache_offset + 1) % (YAW_CACHE_SIZE + 1);
     }
 
+    inline static float detect_jitter_threshold(const resolver_info_t::jitter_info_t& jitter)
+    {
+        float max_diff = 0.f;
+        for (int i = 0; i < YAW_CACHE_SIZE - 1; ++i)
+        {
+            float diff = std::fabsf(jitter.yaw_cache[i] - jitter.yaw_cache[i + 1]);
+            max_diff = std::max(max_diff, diff);
+        }
+        return max_diff > 0.f ? max_diff : DEFAULT_JITTER_THRESHOLD;
+    }
+
     inline static void analyze_yaw_differences(resolver_info_t::jitter_info_t& jitter)
     {
+        float jitter_threshold = detect_jitter_threshold(jitter);
+        
         for (int i = 0; i < YAW_CACHE_SIZE - 1; ++i)
         {
             float diff = std::fabsf(jitter.yaw_cache[i] - jitter.yaw_cache[i + 1]);
@@ -28,7 +41,7 @@ namespace resolver
                 jitter.static_ticks = std::min(jitter.static_ticks + 1, MAX_STATIC_TICKS);
                 jitter.jitter_ticks = 0;
             }
-            else if (diff >= JITTER_THRESHOLD)
+            else if (diff >= jitter_threshold)
             {
                 jitter.jitter_ticks = std::min(jitter.jitter_ticks + 1, MAX_JITTER_TICKS);
                 jitter.static_ticks = 0;
@@ -75,29 +88,59 @@ namespace resolver
 
     inline static void resolve_layers(resolver_info_t& info, anim_record_t* current, anim_record_t* previous)
     {
-        if (static_cast<int>(current->layers[6].weight * 1500.f) == static_cast<int>(previous->layers[6].weight * 1000.f))
+        constexpr int NUM_LAYERS_TO_CHECK = 13; // Check all available layers
+        constexpr float WEIGHT_THRESHOLD = 0.001f;
+        constexpr float PLAYBACK_RATE_THRESHOLD = 0.01f;
+
+        float total_delta_zero = 0.f;
+        float total_delta_left = 0.f;
+        float total_delta_right = 0.f;
+        int matching_layers = 0;
+
+        for (int i = 0; i < NUM_LAYERS_TO_CHECK; ++i)
         {
-            const auto& cur_layer6 = current->layers[6];
+            const auto& cur_layer = current->layers[i];
+            const auto& prev_layer = previous->layers[i];
 
-            const auto zero_delta = std::abs(cur_layer6.playback_rate - current->matrix_zero.layers[6].playback_rate);
-            const auto left_delta = std::abs(cur_layer6.playback_rate - current->matrix_left.layers[6].playback_rate);
-            const auto right_delta = std::abs(cur_layer6.playback_rate - current->matrix_right.layers[6].playback_rate);
+            if (std::abs(cur_layer.weight - prev_layer.weight) < WEIGHT_THRESHOLD)
+            {
+                matching_layers++;
 
-            const auto min_delta = std::min({zero_delta, left_delta, right_delta});
+                const auto zero_delta = std::abs(cur_layer.playback_rate - current->matrix_zero.layers[i].playback_rate);
+                const auto left_delta = std::abs(cur_layer.playback_rate - current->matrix_left.layers[i].playback_rate);
+                const auto right_delta = std::abs(cur_layer.playback_rate - current->matrix_right.layers[i].playback_rate);
 
-            if (static_cast<int>(min_delta * 1000.f) == static_cast<int>(left_delta * 1000.f))
+                float weight = cur_layer.weight;
+                total_delta_zero += zero_delta * weight;
+                total_delta_left += left_delta * weight;
+                total_delta_right += right_delta * weight;
+            }
+        }
+
+        if (matching_layers > NUM_LAYERS_TO_CHECK / 2)
+        {
+            const auto min_delta = std::min({total_delta_zero, total_delta_left, total_delta_right});
+
+            if (std::abs(min_delta - total_delta_left) < PLAYBACK_RATE_THRESHOLD)
             {
                 info.anim_resolve_ticks = HACKS->global_vars->tickcount;
                 info.resolved = true;
                 info.mode = XOR("layers");
                 info.side = side_left;
             }
-            else if (static_cast<int>(min_delta * 1000.f) == static_cast<int>(right_delta * 1000.f))
+            else if (std::abs(min_delta - total_delta_right) < PLAYBACK_RATE_THRESHOLD)
             {
                 info.anim_resolve_ticks = HACKS->global_vars->tickcount;
                 info.resolved = true;
                 info.mode = XOR("layers");
                 info.side = side_right;
+            }
+            else if (std::abs(min_delta - total_delta_zero) < PLAYBACK_RATE_THRESHOLD)
+            {
+                info.anim_resolve_ticks = HACKS->global_vars->tickcount;
+                info.resolved = true;
+                info.mode = XOR("layers");
+                info.side = side_zero;
             }
         }
     }
