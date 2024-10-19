@@ -84,8 +84,8 @@ ImVec2 c_menu::get_window_pos()
 
 void c_menu::init_textures()
 {
-	//if (!logo_texture)
-		//add_texture_to_memory(RENDER->get_device(), cheatLogo, sizeof(cheatLogo), &logo_texture);
+	if (!logo_texture)
+		add_texture_to_memory(RENDER->get_device(), cheatLogo, sizeof(cheatLogo), &logo_texture);
 
 	if (!keyboard_texture)
 		add_texture_to_memory(RENDER->get_device(), keyboard_icon, sizeof(keyboard_icon), &keyboard_texture);
@@ -195,24 +195,25 @@ void c_menu::draw_ui_background()
 	auto window_pos = this->get_window_pos();
 
 	auto header_size = ImVec2(720, 47);
+	auto header_size1 = ImVec2(135, 50);
 	// header
-	imgui_blur::create_blur(list, window_pos, ImVec2(window_pos.x + header_size.x, window_pos.y + header_size.y), ImColor(80,80,80, (int)window_alpha), 6.f, ImDrawCornerFlags_Top);
+	imgui_blur::create_blur(list, window_pos, ImVec2(window_pos.x + header_size.x, window_pos.y + header_size.y), ImColor(80, 80, 80, (int)window_alpha), 6.f, ImDrawCornerFlags_Top);
 
 	// image
 	auto image_size = ImVec2(14, 14);
-	auto image_pos_min = ImVec2((header_size.x / 2) - (image_size.x - 2), (header_size.y / 2) - (image_size.y - 2));
-	auto image_pos_max = ImVec2((header_size.x / 2) + (image_size.x - 2), (header_size.y / 2) + (image_size.y - 2));
+	auto image_pos_min = ImVec2((header_size1.x / 2) - (image_size.x - 2), (header_size1.y / 2) - (image_size.y - 2));
+	auto image_pos_max = ImVec2((header_size1.x / 2) + (image_size.x - 2), (header_size1.y / 2) + (image_size.y - 2));
 
 	auto clr = g_cfg.misc.ui_color.base();
 
 	ImGui::PushFont(RENDER->fonts.dmg.get());
 	auto text_size = ImGui::CalcTextSize(this->prefix.c_str());
 
-	//list->AddImage(
-		//(void*)logo_texture, window_pos + image_pos_min - ImVec2(text_size.x - 18, 0.f), window_pos + image_pos_max - ImVec2(text_size.x - 18, 0.f), ImVec2(0, 0), ImVec2(1, 1), clr.new_alpha(window_alpha).as_imcolor());
+	list->AddImage(
+		(void*)logo_texture, window_pos + image_pos_min - ImVec2(text_size.x - 18, 0.f), window_pos + image_pos_max - ImVec2(text_size.x - 18, 0.f), ImVec2(0, 0), ImVec2(1, 1));
 
 	auto base_x = window_pos.x - text_size.x + 18.f;
-	list->AddText(ImVec2(base_x + 50.f, window_pos.y + 15), ImColor(255, 255, 255, (int)(150.f * alpha)), this->prefix.c_str());
+	list->AddText(ImVec2(base_x + 90.f, window_pos.y + 15), ImColor(255, 255, 255, (int)(150.f * alpha)), this->prefix.c_str());
 	ImGui::PopFont();
 
 	// body
