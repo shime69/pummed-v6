@@ -344,7 +344,7 @@ namespace xor_strs
 	extern std::string glove_skin_rattler;
 	extern std::string glove_skin_case;
 	extern std::string glove_skin_crimson_web;
-	extern std::string glove_skin_buñkshot;
+	//extern std::string glove_skin_buÃ±kshot;
 	extern std::string glove_skin_fade;
 	extern std::string glove_skin_mogul;
 

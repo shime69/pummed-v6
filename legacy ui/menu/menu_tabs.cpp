@@ -80,7 +80,7 @@ BOOL search_files(LPCTSTR lpszFileName, LPSEARCHFUNC lpSearchFunc, BOOL bInnerFo
 					search_files(next, lpSearchFunc, TRUE);
 				}
 			} while (FindNextFileA(hSearch, &wfd));
-			FindClose(hSearch);
+		FindClose(hSearch);
 	}
 
 	if ((hSearch = FindFirstFileA(lpszFileName, &wfd)) == INVALID_HANDLE_VALUE)
@@ -564,7 +564,7 @@ const char* glove_skins[]
 	xor_strs::glove_skin_rattler.c_str(),
 	xor_strs::glove_skin_case.c_str(),
 	xor_strs::glove_skin_crimson_web.c_str(),
-	xor_strs::glove_skin_buñkshot.c_str(),
+	//xor_strs::glove_skin_buÃ±kshot.c_str(),
 	xor_strs::glove_skin_fade.c_str(),
 	xor_strs::glove_skin_mogul.c_str(),
 };
@@ -573,7 +573,7 @@ const char* tracers[]
 {
 	xor_strs::tracer_beam.c_str(),
 	xor_strs::tracer_line.c_str(),
-//	xor_strs::tracer_glow.c_str(),
+	//	xor_strs::tracer_glow.c_str(),
 };
 
 #if ALPHA || _DEBUG || BETA
@@ -617,35 +617,35 @@ void c_menu::draw_ui_items()
 	alpha = tab_alpha;
 
 	auto render_warning_message = [&](const std::string& type, const std::string& type2)
-	{
-		ImGui::PushFont(RENDER->fonts.dmg.get());
+		{
+			ImGui::PushFont(RENDER->fonts.dmg.get());
 
-		auto old_pos = ImGui::GetCursorPos();
+			auto old_pos = ImGui::GetCursorPos();
 
 #ifdef LEGACY
-		auto text = /*XOR("Please turn off ") + type +*/ type2 + XOR(" is not available on legacy!");
+			auto text = /*XOR("Please turn off ") + type +*/ type2 + XOR(" is not available on legacy!");
 #else
-		auto text = /*XOR("Please turn off ") + type +*/ XOR("Currently ") + type2 + XOR(" is under construction!");
+			auto text = /*XOR("Please turn off ") + type +*/ XOR("Currently ") + type2 + XOR(" is under construction!");
 #endif
-		auto text_size = ImGui::CalcTextSize(text.c_str());
+			auto text_size = ImGui::CalcTextSize(text.c_str());
 
-		auto half_text_size = ImVec2(text_size.x / 2.f, text_size.y / 2.f);
-		auto image_size = ImVec2(32, 32);
+			auto half_text_size = ImVec2(text_size.x / 2.f, text_size.y / 2.f);
+			auto image_size = ImVec2(32, 32);
 
-		auto half_window = ((window_bb.Min + window_bb.Max) - ImVec2(0.f, image_size.y * 2.f)) / 2.f;
-		auto half_image = image_size / 2.f;
+			auto half_window = ((window_bb.Min + window_bb.Max) - ImVec2(0.f, image_size.y * 2.f)) / 2.f;
+			auto half_image = image_size / 2.f;
 
-		list->AddImage((void*)warning_texture, half_window - half_image, half_window + half_image, ImVec2(0, 0), ImVec2(1, 1), c_color(255, 255, 255, 150 * alpha).as_imcolor());
+			list->AddImage((void*)warning_texture, half_window - half_image, half_window + half_image, ImVec2(0, 0), ImVec2(1, 1), c_color(255, 255, 255, 150 * alpha).as_imcolor());
 
-		ImGui::SetCursorPos(ImVec2(new_pos.x + 110.f / 2.f - half_text_size.x, new_pos.y + 290.f / 2.f - half_text_size.y));
+			ImGui::SetCursorPos(ImVec2(new_pos.x + 110.f / 2.f - half_text_size.x, new_pos.y + 290.f / 2.f - half_text_size.y));
 
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 0.6f * alpha));
-		ImGui::Text(text.c_str());
-		ImGui::PopStyleColor();
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 0.6f * alpha));
+			ImGui::Text(text.c_str());
+			ImGui::PopStyleColor();
 
-		ImGui::PopFont();
-		ImGui::SetCursorPos(old_pos);
-	};
+			ImGui::PopFont();
+			ImGui::SetCursorPos(old_pos);
+		};
 
 	if (tab_selector == 6)
 	{
@@ -749,8 +749,8 @@ void c_menu::draw_ui_items()
 
 						slider_int(CXOR("Head scale"), &weapon_settings.scale_head, -1, 100, scale_head_str.c_str());
 						slider_int(CXOR("Body scale"), &weapon_settings.scale_body, -1, 100, scale_body_str.c_str());
-						checkbox( CXOR("Prefer body"), &weapon_settings.prefer_body );
-						checkbox( CXOR("Prefer safe point"), &weapon_settings.prefer_safe );
+						checkbox(CXOR("Prefer body"), &weapon_settings.prefer_body);
+						checkbox(CXOR("Prefer safe point"), &weapon_settings.prefer_safe);
 					}
 					end_child;
 				}
@@ -759,7 +759,7 @@ void c_menu::draw_ui_items()
 		break;
 		case 1:
 		{
-				render_warning_message(XOR("rage"), XOR("legit"));
+			render_warning_message(XOR("rage"), XOR("legit"));
 		}
 		break;
 		case 2:

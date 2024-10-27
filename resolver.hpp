@@ -5,6 +5,14 @@ constexpr int CACHE_SIZE = 2;
 constexpr int YAW_CACHE_SIZE = 8;
 constexpr auto MAX_TICKS = 3;
 
+struct defensive_record_t
+{
+	float sim_time;
+	int tickbase;
+	vec3_t eye_angles;
+	bool breaking_lc;
+};
+
 struct resolver_info_t
 {
 	bool resolved{};
