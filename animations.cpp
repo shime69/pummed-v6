@@ -372,13 +372,13 @@ static INLINE void update_sides(c_cs_player* player, anims_t* anim, anim_record_
 		{
 			float simulate_time = previous->sim_time + simulate_tick * HACKS->global_vars->interval_per_tick;
 
-			HACKS->global_vars->curtime = simulate_time;
+			/*HACKS->global_vars->curtime = simulate_time;
 			HACKS->global_vars->realtime = simulate_time;
 			HACKS->global_vars->frametime = HACKS->global_vars->interval_per_tick;
 			HACKS->global_vars->absoluteframetime = HACKS->global_vars->interval_per_tick;
 			HACKS->global_vars->framecount = TIME_TO_TICKS(simulate_time);
 			HACKS->global_vars->tickcount = TIME_TO_TICKS(simulate_time);
-			HACKS->global_vars->interpolation_amount = 0.f;
+			HACKS->global_vars->interpolation_amount = 0.f;*/
 
 			if (simulate_time == land_time)
 			{

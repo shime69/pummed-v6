@@ -1,5 +1,6 @@
 #include "globals.hpp"
 #include "event_logs.hpp"
+#include "imgui/imgui.h"
 
 void c_event_logs::on_item_purchase(c_game_event* event)
 {
@@ -40,7 +41,7 @@ void c_event_logs::on_bomb_plant(c_game_event* event)
 		return;
 
 	if (!std::strcmp(event_name, CXOR("bomb_planted")))
-		push_message(tfm::format(CXOR("%s is planted the bomb"), player->get_name()));
+		push_message(tfm::format(CXOR("%s planted the bomb"), player->get_name()));
 
 	if (!std::strcmp(event_name, CXOR("bomb_begindefuse")))
 		push_message(tfm::format(CXOR("%s is defusing the bomb"), player->get_name()));
@@ -126,12 +127,12 @@ void c_event_logs::render_logs()
 		return;
 
 	constexpr auto font_size = 15.f;
+	constexpr auto padding = 8.f;
 	auto render_font = RENDER->fonts.eventlog;
 	auto time = HACKS->system_time();
 
-	float offset{};
 	float x = 10.f, y = 8.f;
-	for (int i = 0; i < event_logs.size(); ++i )
+	for (int i = 0; i < event_logs.size(); ++i)
 	{
 		auto event_log = &event_logs[i];
 
@@ -139,21 +140,43 @@ void c_event_logs::render_logs()
 		if (time_left <= 0.5f)
 		{
 			float f = std::clamp(time_left, 0.0f, .5f) / .5f;
-
 			event_log->clr.a() = ((std::uint8_t)(f * 255.0f));
 
 			if (i == 0 && f < 0.2f)
 				y -= font_size * (1.0f - f / 0.2f);
 
-			if (time_left <= 0.f) 
+			if (time_left <= 0.f)
 			{
 				event_logs.erase(event_logs.begin() + i);
 				continue;
 			}
 		}
 
+		// Get text size for box
+		ImVec2 text_size_im = RENDER->get_text_size(&render_font, event_log->message.c_str());
+		vec2_t text_size(text_size_im.x, text_size_im.y); // Convert ImVec2 to vec2_t
+		
+		// Draw box background
+		RENDER->filled_rect(
+			x - padding, 
+			y - padding, 
+			text_size.x + (padding * 2), 
+			text_size.y + (padding * 2), 
+			c_color(20, 20, 20, event_log->clr.a())
+		);
+
+		// Draw accent line on left side
+		RENDER->filled_rect(
+			x - padding,
+			y - padding,
+			2,
+			text_size.y + (padding * 2),
+			c_color(g_cfg.misc.ui_color[0], g_cfg.misc.ui_color[1], g_cfg.misc.ui_color[2], event_log->clr.a())
+		);
+
+		// Draw text
 		RENDER->text(x, y, event_log->clr, FONT_DROPSHADOW, &render_font, event_log->message);
 
-		y += font_size;
+		y += text_size.y + (padding * 2) + 2; // Add gap between logs
 	}
 }

@@ -1585,7 +1585,7 @@ void c_ragebot::run()
 					best_point.damage,
 					best_record->extrapolated ? -best_record->extrapolate_ticks : backtrack_ticks,
 					best_point.safety,
-					shots.back().resolver.resolved ? shots.back().resolver.mode : "none",
+					shots.back().resolver.mode,
 					shots.back().resolver.side
 				);
 

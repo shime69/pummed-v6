@@ -165,7 +165,7 @@ struct chams_t
 	char chams_sprite[128]{};
 
 	INLINE chams_t(bool enable, bool interp, int mat, int fill, int shot, c_float_color main, c_float_color glow)
-	: enable(enable), interp(interp), material(mat), glow_fill(fill), shot_duration(shot), main_color(main), glow_color(glow) {
+		: enable(enable), interp(interp), material(mat), glow_fill(fill), shot_duration(shot), main_color(main), glow_color(glow) {
 		std::strcpy(chams_sprite, CXOR("models\\weapons\\customization\\paints\\custom\\money"));
 	}
 
