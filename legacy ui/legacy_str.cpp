@@ -26,6 +26,10 @@ namespace xor_strs
 	std::string weapon_p250{};
 	std::string weapon_cz{};
 
+	std::string testik1{};
+	std::string testik2{};
+	std::string testik3{};
+
 	std::string aa_disabled{};
 	std::string aa_default{};
 
@@ -39,6 +43,8 @@ namespace xor_strs
 	std::string aa_jitter_offset{};
 	std::string aa_jitter_random{};
 	std::string aa_jitter_3way{};
+	std::string aa_jitter_5way{};
+	std::string aa_jitter_delay{};
 
 	std::string aa_desync_jitter{};
 
@@ -53,6 +59,21 @@ namespace xor_strs
 	std::string vis_chams_bubble{};
 	std::string vis_chams_money{};
 	std::string vis_chams_fadeup{};
+
+
+	std::string legs1{};
+	std::string legs2{};
+	std::string legs3{};
+
+	std::string movelegsnone{};
+	std::string allah_legs{};
+	std::string jitter_legs{};
+	std::string backward_legs{};
+
+	std::string airlegsnone{};
+	std::string airmovelegs{};
+	std::string airstaticlegs{};
+
 
 	std::string buybot_none{};
 
@@ -90,6 +111,22 @@ namespace xor_strs
 	std::string tracer_beam{};
 	std::string tracer_line{};
 	std::string tracer_glow{};
+
+	std::string Mode1{};
+	std::string Mode2{};
+
+	std::string netypiski1{};
+	std::string netypiski2{};
+	std::string netypiski3{};
+	std::string netypiski4{};
+	std::string netypiski5{};
+	std::string netypiski6{};
+	std::string netypiski7{};
+
+	std::string static_pitch{};
+	std::string random_pitch{};
+	std::string switch_pitch{};
+	std::string way_pitch{};
 
 	std::string defensive_trigger{};
 	std::string defensive_always{};
@@ -385,6 +422,13 @@ namespace xor_strs
 		aa_jitter_offset = XOR("Offset");
 		aa_jitter_random = XOR("Random");
 		aa_jitter_3way = XOR("3-Way");
+		aa_jitter_5way = XOR("5-Way");
+		aa_jitter_delay = XOR("Delay");
+
+
+		testik1 = XOR("Air");
+		testik2 = XOR("Ducking");
+		testik3 = XOR("Move");
 
 #ifdef LEGACY
 		aa_desync_jitter = XOR("Double");
@@ -441,8 +485,36 @@ namespace xor_strs
 		tracer_line = XOR("Line");
 		tracer_glow = XOR("Glow");
 
+		static_pitch = XOR("Static");
+		random_pitch = XOR("Random");
+		switch_pitch = XOR("Switch");
+		way_pitch = XOR("3-Way");
+
+		netypiski1 = XOR("Default");
+		netypiski2 = XOR("Opposite");
+		netypiski3 = XOR("Sideways");
+		netypiski4 = XOR("Slow Spin");
+		netypiski5 = XOR("Fast Spin");
+		netypiski6 = XOR("3-Way");
+		netypiski7 = XOR("Random");
+
+		//legs1 = XOR("legs1");
+		//legs2 = XOR("legs2");
+		//legs3 = XOR("legs3");
+
+		movelegsnone = XOR("None");
+		allah_legs = XOR("Allah Legs");
+		jitter_legs = XOR("Jitter Legs");
+		backward_legs = XOR("Backward Legs");
+
+		airlegsnone = XOR("None");
+		airmovelegs = XOR("Move Legs");
+		airstaticlegs = XOR("Static Legs");
+
 		defensive_trigger = XOR("Trigger");
 		defensive_always = XOR("Always on");
+
+
 
 		knife_default = XOR("Default");
 		knife_bayonet = XOR("Bayonet");

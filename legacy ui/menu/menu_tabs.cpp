@@ -80,7 +80,7 @@ BOOL search_files(LPCTSTR lpszFileName, LPSEARCHFUNC lpSearchFunc, BOOL bInnerFo
 					search_files(next, lpSearchFunc, TRUE);
 				}
 			} while (FindNextFileA(hSearch, &wfd));
-		FindClose(hSearch);
+			FindClose(hSearch);
 	}
 
 	if ((hSearch = FindFirstFileA(lpszFileName, &wfd)) == INVALID_HANDLE_VALUE)
@@ -171,6 +171,26 @@ const char* knife_models[]{
 };
 #endif
 
+const char* kakish_aa_mode[]
+{
+	xor_strs::netypiski1.c_str(),
+	xor_strs::netypiski2.c_str(),
+	xor_strs::netypiski3.c_str(),
+	xor_strs::netypiski4.c_str(),
+	xor_strs::netypiski5.c_str(),
+	xor_strs::netypiski6.c_str(),
+	xor_strs::netypiski7.c_str(),
+};
+
+
+const char* defensive_pitch_mode[]
+{
+	xor_strs::static_pitch.c_str(),
+	xor_strs::random_pitch.c_str(),
+	xor_strs::switch_pitch.c_str(),
+	xor_strs::way_pitch.c_str(),
+};
+
 const char* defensive_aa_mode[]
 {
 	xor_strs::defensive_trigger.c_str(),
@@ -252,6 +272,13 @@ const char* skin_weapon_configs[] = {
 	xor_strs::weapon_cfg_knife.c_str(),
 };
 
+//const char* aa_allah[] =
+//{
+//  xor_strs::testik1.c_str(),
+//  xor_strs::testik2.c_str(),
+//  xor_strs::testik3.c_str(),
+//};
+
 const char* aa_pitch[] =
 {
   xor_strs::aa_disabled.c_str(),
@@ -273,6 +300,8 @@ const char* aa_jitter_yaw[] =
 	  xor_strs::aa_jitter_offset.c_str(),
 	  xor_strs::aa_jitter_random.c_str(),
 	  xor_strs::aa_jitter_3way.c_str(),
+	  xor_strs::aa_jitter_5way.c_str(),
+	  xor_strs::aa_jitter_delay.c_str(),
 };
 
 const char* aa_desync_type[] =
@@ -344,6 +373,31 @@ const char* boxes[]
 	xor_strs::box_default.c_str(),
 	xor_strs::box_thin.c_str(),
 };
+
+//const char* pizdobriker[]
+//{
+//	xor_strs::legs1.c_str(),
+//	xor_strs::legs2.c_str(),
+//	xor_strs::legs3.c_str(),
+//};
+
+
+const char* groundlegs[]
+{
+	xor_strs::movelegsnone.c_str(),
+	xor_strs::allah_legs.c_str(),
+	xor_strs::jitter_legs.c_str(),
+	xor_strs::backward_legs.c_str(),
+};
+
+
+const char* airlegs[]
+{
+	xor_strs::airlegsnone.c_str(),
+	xor_strs::airmovelegs.c_str(),
+	xor_strs::airstaticlegs.c_str(),
+};
+
 
 const char* ragdoll_gravities[]
 {
@@ -573,7 +627,7 @@ const char* tracers[]
 {
 	xor_strs::tracer_beam.c_str(),
 	xor_strs::tracer_line.c_str(),
-	//	xor_strs::tracer_glow.c_str(),
+//	xor_strs::tracer_glow.c_str(),
 };
 
 #if ALPHA || _DEBUG || BETA
@@ -616,36 +670,32 @@ void c_menu::draw_ui_items()
 
 	alpha = tab_alpha;
 
-	auto render_warning_message = [&](const std::string& type, const std::string& type2)
-		{
-			ImGui::PushFont(RENDER->fonts.dmg.get());
+	auto render_warning_message = [&](const std::string& type2)
+	{
+		ImGui::PushFont(RENDER->fonts.dmg.get());
 
-			auto old_pos = ImGui::GetCursorPos();
+		auto old_pos = ImGui::GetCursorPos();
 
-#ifdef LEGACY
-			auto text = /*XOR("Please turn off ") + type +*/ type2 + XOR(" is not available on legacy!");
-#else
-			auto text = /*XOR("Please turn off ") + type +*/ XOR("Currently ") + type2 + XOR(" is under construction!");
-#endif
-			auto text_size = ImGui::CalcTextSize(text.c_str());
+		auto text = /*XOR("Please turn off ") + type +*/ XOR("Currently ") + type2 + XOR(" is under construction!");
+		auto text_size = ImGui::CalcTextSize(text.c_str());
 
-			auto half_text_size = ImVec2(text_size.x / 2.f, text_size.y / 2.f);
-			auto image_size = ImVec2(32, 32);
+		auto half_text_size = ImVec2(text_size.x / 2.f, text_size.y / 2.f);
+		auto image_size = ImVec2(32, 32);
 
-			auto half_window = ((window_bb.Min + window_bb.Max) - ImVec2(0.f, image_size.y * 2.f)) / 2.f;
-			auto half_image = image_size / 2.f;
+		auto half_window = ((window_bb.Min + window_bb.Max) - ImVec2(0.f, image_size.y * 2.f)) / 2.f;
+		auto half_image = image_size / 2.f;
 
-			list->AddImage((void*)warning_texture, half_window - half_image, half_window + half_image, ImVec2(0, 0), ImVec2(1, 1), c_color(255, 255, 255, 150 * alpha).as_imcolor());
+		list->AddImage((void*)warning_texture, half_window - half_image, half_window + half_image, ImVec2(0, 0), ImVec2(1, 1), c_color(255, 255, 255, 150 * alpha).as_imcolor());
 
-			ImGui::SetCursorPos(ImVec2(new_pos.x + 110.f / 2.f - half_text_size.x, new_pos.y + 290.f / 2.f - half_text_size.y));
+		ImGui::SetCursorPos(ImVec2(new_pos.x + 110.f / 2.f - half_text_size.x, new_pos.y + 290.f / 2.f - half_text_size.y));
 
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 0.6f * alpha));
-			ImGui::Text(text.c_str());
-			ImGui::PopStyleColor();
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 0.6f * alpha));
+		ImGui::Text(text.c_str());
+		ImGui::PopStyleColor();
 
-			ImGui::PopFont();
-			ImGui::SetCursorPos(old_pos);
-		};
+		ImGui::PopFont();
+		ImGui::SetCursorPos(old_pos);
+	};
 
 	if (tab_selector == 6)
 	{
@@ -664,6 +714,10 @@ void c_menu::draw_ui_items()
 		{
 		case 0:
 		{
+			// please turn off legit before configuring rage!
+			//if (g_cfg.legit.enable)
+			//	render_warning_message(XOR("legit"), XOR("rage"));
+		//	else
 			{
 				ImGui::Columns(2, 0, false);
 				ImGui::SetColumnOffset(1, 270);
@@ -694,7 +748,9 @@ void c_menu::draw_ui_items()
 
 						key_bind(CXOR("Hide shots"), g_cfg.binds[hs_b]);
 
-						multi_combo(CXOR("Defensive options##double_tap"), g_cfg.rage.defensive_options, { XOR("Always on"), XOR("Defensive teleport") });
+						checkbox(CXOR("Defensive in air"), &g_cfg.rage.air_defensive);
+						checkbox(CXOR("Defensive Always On"), &g_cfg.rage.always_defensive);
+						checkbox(CXOR("Delay on breaklc"), &g_cfg.rage.delay_lc);
 					}
 					end_child;
 
@@ -704,6 +760,7 @@ void c_menu::draw_ui_items()
 						key_bind(CXOR("Force body"), g_cfg.binds[force_body_b]);
 
 						key_bind(CXOR("Force safe point"), g_cfg.binds[force_sp_b]);
+
 					}
 					end_child;
 
@@ -728,13 +785,15 @@ void c_menu::draw_ui_items()
 						auto dmg_str = weapon_settings.mindamage == 100 ? CXOR("HP") : weapon_settings.mindamage > 100 ? CXOR("HP + ") + std::to_string(weapon_settings.mindamage - 100) : CXOR("%dHP");
 						auto override_str = weapon_settings.damage_override == 100 ? CXOR("HP") : weapon_settings.damage_override > 100 ? CXOR("HP + ") + std::to_string(weapon_settings.damage_override - 100) : CXOR("%dHP");
 
+				//		multi_combo(CXOR("Skip hitchance"), weapon_settings.hitchance_skips, { XOR("Low spread"), XOR("DT / Still") });
+
 						slider_int(CXOR("Hitchance"), &weapon_settings.hitchance, 0, 100, CXOR("%d%%"));
 
 						slider_int(CXOR("Min damage"), &weapon_settings.mindamage, 1, 120, dmg_str.c_str());
 						slider_int(CXOR("Min damage (override)"), &weapon_settings.damage_override, 1, 120, override_str.c_str());
 
 						checkbox(CXOR("Quick stop"), &weapon_settings.quick_stop);
-						multi_combo(CXOR("Options##quick_stop"), weapon_settings.quick_stop_options, { CXOR("Early"), CXOR("Between shots"), CXOR("Force accuracy"), CXOR("In air") });
+						multi_combo(CXOR("Options##quick_stop"), weapon_settings.quick_stop_options, { CXOR("Early"), CXOR("Between shots"), CXOR("Force accuracy"), CXOR("In air")/*, CXOR("Force duck")*/ });
 					}
 					end_child;
 
@@ -749,17 +808,87 @@ void c_menu::draw_ui_items()
 
 						slider_int(CXOR("Head scale"), &weapon_settings.scale_head, -1, 100, scale_head_str.c_str());
 						slider_int(CXOR("Body scale"), &weapon_settings.scale_body, -1, 100, scale_body_str.c_str());
-						checkbox(CXOR("Prefer body"), &weapon_settings.prefer_body);
-						checkbox(CXOR("Prefer safe point"), &weapon_settings.prefer_safe);
+						checkbox( CXOR("Prefer body"), &weapon_settings.prefer_body );
+						checkbox( CXOR("Prefer safe point"), &weapon_settings.prefer_safe );
+
+				/*		checkbox(CXOR("Prefer safe point"), &weapon_settings.prefer_safe);
+						checkbox(CXOR("Prefer body"), &weapon_settings.prefer_body);*/
 					}
 					end_child;
+
+					//begin_child(CXOR("Roll resolver"))
+					//{
+					//	key_bind(CXOR("Roll override"), g_cfg.binds[force_roll_b]);
+					//	slider_int(CXOR("Angle"), &g_cfg.rage.roll_amt, -90, 90, CXOR("%d degree"));
+					//	slider_int(CXOR("Pitch angle"), &g_cfg.rage.roll_amt_pitch, 0, 20, CXOR("%d degree"));
+					//}
+					//end_child;
 				}
 			}
 		}
 		break;
 		case 1:
 		{
-			render_warning_message(XOR("rage"), XOR("legit"));
+			// please turn off rage before configuring legit!
+		//	if (g_cfg.rage.enable)
+				render_warning_message(XOR("legit"));
+			/*else
+			{
+				ImGui::Columns(2, 0, false);
+				ImGui::SetColumnOffset(1, 270);
+				{
+					begin_child(CXOR("Choose your weapon    "))
+					{
+						combo(CXOR("Setting up...##legit"), &g_cfg.legit.group_type, legit_weapon_configs, IM_ARRAYSIZE(legit_weapon_configs));
+					}
+					end_child;
+
+					begin_child(CXOR("General     "))
+					{
+						checkbox(CXOR("Enable##legit_cfg"), &g_cfg.legit.enable);
+
+						key_bind(CXOR("Aim##legit_cfg"), g_cfg.binds[toggle_legit_b]);
+						checkbox(CXOR("Autowall##legit_cfg"), &g_cfg.legit.autowall);
+
+						auto dmg_str = g_cfg.legit.min_damage == 100 ? CXOR("HP") : g_cfg.legit.min_damage > 100 ? CXOR("HP + ") + std::to_string(g_cfg.legit.min_damage - 100) : CXOR("%dHP");
+
+						slider_int(CXOR("Min damage"), &g_cfg.legit.min_damage, 1, 120, dmg_str.c_str());
+
+						checkbox(CXOR("Disable on flash"), &g_cfg.legit.flash_check);
+						checkbox(CXOR("Disable on smoke"), &g_cfg.legit.smoke_check);
+					}
+					end_child;
+
+					begin_child(CXOR("RCS settings "))
+					{
+						auto& rcs_cfg = g_cfg.legit.rcs;
+						checkbox(CXOR("Enable##legit_aimbot_rcs"), &rcs_cfg.enable);
+
+						slider_int(CXOR("Amount##legit_aimbot_rcs"), &rcs_cfg.amount, 1, 100, CXOR("%d%%"));
+					}
+					end_child;
+				}
+				ImGui::NextColumn();
+				{
+					begin_child(CXOR("Weapon settings "))
+					{
+						auto& legit_cfg = g_cfg.legit.legit_weapon[g_cfg.legit.group_type];
+						checkbox(CXOR("Enable##legit_aimbot"), &legit_cfg.enable);
+						checkbox(CXOR("Draw FOV##legit_aimbot"), &legit_cfg.fov_cicle);
+						color_picker(CXOR("FOV color##legit_aimbot"), legit_cfg.circle_color);
+						checkbox(CXOR("Backtrack##legit_aimbot"), &legit_cfg.backtrack);
+						checkbox(CXOR("Quick stop##legit_aimbot"), &legit_cfg.quick_stop);
+
+						multi_combo(CXOR("Hitboxes"), legit_cfg.hitboxes, { XOR("Head"), XOR("Chest"), XOR("Stomach"), XOR("Pelvis") });
+
+						slider_int(CXOR("FOV"), &legit_cfg.fov, 1, 100);
+						slider_int(CXOR("Smooth"), &legit_cfg.smooth, 1, 100);
+
+						slider_int(CXOR("Shot delay"), &legit_cfg.aim_delay, 0, 1000, CXOR("%d% ms"));
+					}
+					end_child;
+				}
+			}*/
 		}
 		break;
 		case 2:
@@ -770,32 +899,71 @@ void c_menu::draw_ui_items()
 				begin_child(CXOR("Main"))
 				{
 					checkbox(CXOR("Enable##antiaim"), &g_cfg.antihit.enable);
+					//checkbox(CXOR("Silent on-shot##antiaim"), &g_cfg.antihit.silent_onshot);
+					//combo(CXOR("allahtest"), &g_cfg.antihit.allah, aa_allah , IM_ARRAYSIZE(aa_allah));
 
-					checkbox(CXOR("At targets##antiaim"), &g_cfg.antihit.at_targets);
+						checkbox(CXOR("At targets##antiaim"), &g_cfg.antihit.at_targets);
 
-					combo(CXOR("Pitch"), &g_cfg.antihit.pitch, aa_pitch, IM_ARRAYSIZE(aa_pitch));
-					combo(CXOR("Yaw"), &g_cfg.antihit.yaw, aa_yaw, IM_ARRAYSIZE(aa_yaw));
-					slider_int(CXOR("Yaw add"), &g_cfg.antihit.yaw_add, -180, 180);
+						combo(CXOR("Pitch"), &g_cfg.antihit.pitch, aa_pitch, IM_ARRAYSIZE(aa_pitch));
+						combo(CXOR("Yaw"), &g_cfg.antihit.yaw, aa_yaw, IM_ARRAYSIZE(aa_yaw));
+						slider_int(CXOR("Yaw add"), &g_cfg.antihit.yaw_add, -180, 180);
 
-					combo(CXOR("Yaw jitter"), &g_cfg.antihit.jitter_mode, aa_jitter_yaw, IM_ARRAYSIZE(aa_jitter_yaw));
-					if (g_cfg.antihit.jitter_mode > 0)
-						slider_int(CXOR("Range##jitter"), &g_cfg.antihit.jitter_range, -180, 180);
+						combo(CXOR("Yaw jitter"), &g_cfg.antihit.jitter_mode, aa_jitter_yaw, IM_ARRAYSIZE(aa_jitter_yaw));
+						if (g_cfg.antihit.jitter_mode > 0)
+							slider_int(CXOR("Range##jitter"), &g_cfg.antihit.jitter_range, -180, 180);
 
-					key_bind(CXOR("Edge yaw"), g_cfg.binds[edge_b]);
-					key_bind(CXOR("Freestanding"), g_cfg.binds[freestand_b]);
+						key_bind(CXOR("Edge yaw"), g_cfg.binds[edge_b]);
+						key_bind(CXOR("Freestanding"), g_cfg.binds[freestand_b]);
 
-					key_bind(CXOR("Manual left"), g_cfg.binds[left_b]);
-					key_bind(CXOR("Manual right"), g_cfg.binds[right_b]);
-					key_bind(CXOR("Manual back"), g_cfg.binds[back_b]);
+						key_bind(CXOR("Manual left"), g_cfg.binds[left_b]);
+						key_bind(CXOR("Manual right"), g_cfg.binds[right_b]);
+						key_bind(CXOR("Manual back"), g_cfg.binds[back_b]);
+					
 				}
 				end_child;
 
 				begin_child(CXOR("Defensive Anti-Aims"))
 				{
 					checkbox(CXOR("Change pitch##antiaim"), &g_cfg.antihit.def_pitch);
+					if (g_cfg.antihit.def_pitch)
+					{
+
+
+						combo(CXOR("Defensive Pitch Type##antiaim"), &g_cfg.antihit.def_pitch_mode, defensive_pitch_mode, IM_ARRAYSIZE(defensive_pitch_mode));
+						if (g_cfg.antihit.def_pitch_mode == 0)
+						{
+							slider_int(CXOR("Pitch##antiaim"), &g_cfg.antihit.custom_pitch, -89, 89);
+						}
+						if (g_cfg.antihit.def_pitch_mode == 1)
+						{
+							slider_int(CXOR("Pitch Random Amount 2##antiaim"), &g_cfg.antihit.random_pitch, -89, 89);
+							slider_int(CXOR("Pitch Random Amount 1##antiaim"), &g_cfg.antihit.random_pitch2, -89, 89);
+						}
+						if (g_cfg.antihit.def_pitch_mode == 2)
+						{
+							slider_int(CXOR("Pitch Switch Amount 2##antiaim"), &g_cfg.antihit.switch_pitch, -89, 89);
+							slider_int(CXOR("Pitch Switch Amount 1##antiaim"), &g_cfg.antihit.switch_pitch2, -89, 89);
+							//slider_int(CXOR("Pitch Switch Delay##antiaim"), &g_cfg.antihit.switch_pitch_delay, 1, 10);
+
+						}
+						if (g_cfg.antihit.def_pitch_mode == 3)
+						{
+							slider_int(CXOR("Pitch 3-Way Amount 2##antiaim"), &g_cfg.antihit.way_pitch, -89, 89);
+							slider_int(CXOR("Pitch 3-Way Amount 1##antiaim"), &g_cfg.antihit.way_pitch2, -89, 89);
+						}
+					}
 					checkbox(CXOR("Change yaw##antiaim"), &g_cfg.antihit.def_yaw);
+					if (g_cfg.antihit.def_yaw)
+					{
+						combo(CXOR("Yaw Type##antiaim"), &g_cfg.antihit.sukablyat, kakish_aa_mode, IM_ARRAYSIZE(kakish_aa_mode));
+					}
+					
 
 					combo(CXOR("Defensive type##antiaim"), &g_cfg.antihit.def_aa_mode, defensive_aa_mode, IM_ARRAYSIZE(defensive_aa_mode));
+					if (g_cfg.antihit.def_aa_mode == 1)
+					{
+						slider_int(CXOR("Value"), &g_cfg.antihit.ticks_defensive, 0, 10);
+					}
 				}
 				end_child;
 			}
@@ -820,6 +988,7 @@ void c_menu::draw_ui_items()
 
 				begin_child(CXOR("Enhancement"))
 				{
+				//	checkbox(CXOR("Jitter move"), &g_cfg.antihit.jitter_move);
 					checkbox(CXOR("Randomize yaw jitter"), &g_cfg.antihit.random_jitter);
 					checkbox(CXOR("Randomize fake jitter"), &g_cfg.antihit.random_dsy);
 					checkbox(CXOR("Randomize fake amount"), &g_cfg.antihit.random_amount);
@@ -840,6 +1009,7 @@ void c_menu::draw_ui_items()
 					combo(CXOR("Fake type"), &g_cfg.antihit.desync_mode, aa_desync_type, IM_ARRAYSIZE(aa_desync_type));
 					slider_int(CXOR("Left amount##desync"), &g_cfg.antihit.desync_left, 0, 58, CXOR("%d"));
 					slider_int(CXOR("Right amount##desync"), &g_cfg.antihit.desync_right, 0, 58, CXOR("%d"));
+				//	combo(CXOR("Breaker type"), &g_cfg.antihit.desync_mode, aa_desync_type, IM_ARRAYSIZE(aa_desync_type));
 				}
 				end_child;
 
@@ -899,6 +1069,8 @@ void c_menu::draw_ui_items()
 							  XOR("Flags"),
 							  XOR("OOF Arrow"),
 							  XOR("Glow"),
+							  //XOR("Resolver mode"),
+							  //XOR("Skeleton"),
 							});
 
 						if (enemy_esp.elements & 1)
@@ -918,6 +1090,9 @@ void c_menu::draw_ui_items()
 
 						if (enemy_esp.elements & 256)
 							color_picker(CXOR("Glow color##esp_enemy"), enemy_esp.colors.glow);
+
+						/*if (enemy_esp.elements & 512)
+							color_picker(CXOR("Skeleton color##esp_enemy"), enemy_esp.colors.skeleton);*/
 					}
 					end_child;
 				}
@@ -1358,6 +1533,7 @@ void c_menu::draw_ui_items()
 					{
 						color_picker(CXOR("Accent color"), g_cfg.misc.ui_color);
 						multi_combo(CXOR("Indicators##menu"), g_cfg.misc.menu_indicators, { XOR("Keybind list"), XOR("Bomb"), XOR("Watermark"), XOR("Spectators") });
+						input_text("Username", g_cfg.misc.cheat_username, 32);
 					}
 					end_child;
 				}
@@ -1366,6 +1542,14 @@ void c_menu::draw_ui_items()
 					begin_child(CXOR("Changers"))
 					{
 						combo(CXOR("Ragdoll gravity"), &g_cfg.misc.ragdoll_gravity, ragdoll_gravities, IM_ARRAYSIZE(ragdoll_gravities));
+
+						checkbox(CXOR("Anim. Breakers Enable"), &g_cfg.misc.pizdobriker1);
+						if (g_cfg.misc.pizdobriker1)
+						{
+							combo(CXOR("On Ground Legs"), &g_cfg.misc.ground_legs, groundlegs, IM_ARRAYSIZE(groundlegs));
+							combo(CXOR("In Air Legs"), &g_cfg.misc.air_legs, airlegs, IM_ARRAYSIZE(airlegs));
+							multi_combo(CXOR("Other Breakers"), g_cfg.misc.pizdobriker, { XOR("Eblan Breaker"), XOR("Pitch 0 On Land"), XOR("Move Lean")});
+						}
 						checkbox(CXOR("Clantag changer"), &g_cfg.misc.clantag);
 					}
 					end_child;
@@ -1374,6 +1558,10 @@ void c_menu::draw_ui_items()
 					{
 						checkbox(CXOR("Unlock hidden cvars"), &g_cfg.misc.unlock_hidden_cvars);
 						checkbox(CXOR("Bypass sv_pure"), &g_cfg.misc.bypass_sv_pure);
+
+#if ALPHA || _DEBUG
+						checkbox(CXOR("Force crash"), &g_cfg.misc.force_crash);
+#endif
 					}
 					end_child;
 				}
@@ -1407,6 +1595,7 @@ void c_menu::draw_ui_items()
 				}
 				end_child;
 
+#ifndef LEGACY
 				begin_child(CXOR("Player"))
 				{
 					combo(CXOR("Mask"), &g_cfg.skins.masks, masks, IM_ARRAYSIZE(masks));
@@ -1422,6 +1611,7 @@ void c_menu::draw_ui_items()
 						input_text(CXOR("Model path##agent_t"), g_cfg.skins.custom_model_t, 128);
 				}
 				end_child;
+#endif
 			}
 			ImGui::NextColumn();
 			{
@@ -1480,7 +1670,7 @@ void c_menu::draw_ui_items()
 					button(CXOR("Open configs folder"),
 						[]()
 						{
-							std::string folder = CXOR("pummed\\");
+							std::string folder = CXOR("airflow\\");
 							ShellExecuteA(NULL, NULL, folder.c_str(), NULL, NULL, SW_SHOWNORMAL);
 						});
 				}
@@ -1542,6 +1732,10 @@ void c_menu::draw_ui_items()
 				end_child;
 			}
 		}
+		break;
+
+		case 7:
+			render_warning_message( XOR( "scripts" ) );
 		break;
 		}
 	}

@@ -30,6 +30,12 @@ namespace xor_strs
 	extern std::string weapon_p250;
 	extern std::string weapon_cz;
 
+	extern std::string testik1;
+	extern std::string testik2;
+	extern std::string testik3;
+
+
+
 	extern std::string aa_disabled;
 	extern std::string aa_default;
 
@@ -43,6 +49,8 @@ namespace xor_strs
 	extern std::string aa_jitter_offset;
 	extern std::string aa_jitter_random;
 	extern std::string aa_jitter_3way;
+	extern std::string aa_jitter_5way;
+	extern std::string aa_jitter_delay;
 
 	extern std::string aa_desync_jitter;
 
@@ -57,6 +65,20 @@ namespace xor_strs
 	extern std::string vis_chams_bubble;
 	extern std::string vis_chams_money;
 	extern std::string vis_chams_fadeup;
+
+	extern std::string legs1;
+	extern std::string legs2;
+	extern std::string legs3;
+
+	extern std::string movelegsnone;
+	extern std::string allah_legs;
+	extern std::string jitter_legs;
+	extern std::string backward_legs;
+
+	extern std::string airlegsnone;
+	extern std::string airmovelegs;
+	extern std::string airstaticlegs;
+
 
 	extern std::string buybot_none;
 
@@ -94,6 +116,19 @@ namespace xor_strs
 	extern std::string tracer_beam;
 	extern std::string tracer_line;
 	extern std::string tracer_glow;
+
+	extern std::string netypiski1;
+	extern std::string netypiski2;
+	extern std::string netypiski3;
+	extern std::string netypiski4;
+	extern std::string netypiski5;
+	extern std::string netypiski6;
+	extern std::string netypiski7;
+
+	extern std::string static_pitch;
+	extern std::string random_pitch;
+	extern std::string switch_pitch;
+	extern std::string way_pitch;
 
 	extern std::string defensive_trigger;
 	extern std::string defensive_always;

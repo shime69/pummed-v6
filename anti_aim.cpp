@@ -83,7 +83,7 @@ INLINE int get_ticks_to_stop()
 	{
 		if (vel.length_2d() < 1.f)
 			break;
-
+		
 		game_movement::friction(vel);
 
 		ticks_to_stop++;
@@ -284,77 +284,77 @@ void c_anti_aim::freestanding()
 	static float auto_dir{}, auto_dist{};
 
 	auto update_dir = [&]()
+	{
+		constexpr float STEP{ 4.f };
+		constexpr float RANGE{ 20.f };
+
+		auto anim = ANIMFIX->get_local_anims();
+
+		std::vector< c_adaptive_angle > angles{ };
+		angles.emplace_back(best_yaw - 180.f);
+		angles.emplace_back(best_yaw - 90.f);
+		angles.emplace_back(best_yaw + 90.f);
+
+		vec3_t start = player->get_eye_position();
+		bool valid{ false };
+
+		for (auto it = angles.begin(); it != angles.end(); ++it) 
 		{
-			constexpr float STEP{ 4.f };
-			constexpr float RANGE{ 20.f };
+			vec3_t end { 
+				anim->eye_pos.x + std::cos(DEG2RAD(it->yaw)) * RANGE,
+				anim->eye_pos.y + std::sin(DEG2RAD(it->yaw)) * RANGE,
+				anim->eye_pos.z 
+			};
 
-			auto anim = ANIMFIX->get_local_anims();
+			vec3_t dir = end - start;
+			float len = dir.normalized_float();
 
-			std::vector< c_adaptive_angle > angles{ };
-			angles.emplace_back(best_yaw - 180.f);
-			angles.emplace_back(best_yaw - 90.f);
-			angles.emplace_back(best_yaw + 90.f);
+			if (len <= 0.f)
+				continue;
 
-			vec3_t start = player->get_eye_position();
-			bool valid{ false };
-
-			for (auto it = angles.begin(); it != angles.end(); ++it)
+			for (float i{ 0.f }; i < len; i += STEP) 
 			{
-				vec3_t end{
-					anim->eye_pos.x + std::cos(DEG2RAD(it->yaw)) * RANGE,
-					anim->eye_pos.y + std::sin(DEG2RAD(it->yaw)) * RANGE,
-					anim->eye_pos.z
-				};
-
-				vec3_t dir = end - start;
-				float len = dir.normalized_float();
-
-				if (len <= 0.f)
+				vec3_t point = start + (dir * i);
+				int contents = HACKS->engine_trace->get_point_contents(point, MASK_SHOT_HULL);
+				if (!(contents & MASK_SHOT_HULL))
 					continue;
 
-				for (float i{ 0.f }; i < len; i += STEP)
-				{
-					vec3_t point = start + (dir * i);
-					int contents = HACKS->engine_trace->get_point_contents(point, MASK_SHOT_HULL);
-					if (!(contents & MASK_SHOT_HULL))
-						continue;
+				float mult = 1.f;
+				if (i > (len * 0.5f))
+					mult = 1.25f;
 
-					float mult = 1.f;
-					if (i > (len * 0.5f))
-						mult = 1.25f;
+				if (i > (len * 0.75f))
+					mult = 1.25f;
 
-					if (i > (len * 0.75f))
-						mult = 1.25f;
+				if (i > (len * 0.9f))
+					mult = 2.f;
 
-					if (i > (len * 0.9f))
-						mult = 2.f;
+				it->distance += (STEP * mult);
 
-					it->distance += (STEP * mult);
-
-					valid = true;
-				}
+				valid = true;
 			}
+		}
 
-			if (!valid)
-			{
-				auto_dir = math::normalize_yaw(best_yaw - 180.f);
-				auto_dist = -1.f;
-				return;
-			}
+		if (!valid) 
+		{
+			auto_dir = math::normalize_yaw(best_yaw - 180.f);
+			auto_dist = -1.f;
+			return;
+		}
 
-			std::sort(angles.begin(), angles.end(),
-				[](const c_adaptive_angle& a, const c_adaptive_angle& b) {
-					return a.distance > b.distance;
-				});
+		std::sort(angles.begin(), angles.end(),
+			[](const c_adaptive_angle& a, const c_adaptive_angle& b) {
+				return a.distance > b.distance;
+			});
 
-			c_adaptive_angle* best = &angles.front();
+		c_adaptive_angle* best = &angles.front();
 
-			if (best->distance != auto_dist)
-			{
-				auto_dir = math::normalize_yaw(best->yaw);
-				auto_dist = best->distance;
-			}
-		};
+		if (best->distance != auto_dist) 
+		{
+			auto_dir = math::normalize_yaw(best->yaw);
+			auto_dist = best->distance;
+		}
+	};
 
 	update_dir();
 
@@ -417,39 +417,34 @@ c_cs_player* c_anti_aim::get_closest_player(bool skip, bool local_distance)
 	vec3_t local_eye_pos = local_anim->eye_pos;
 
 	LISTENER_ENTITY->for_each_player([&](c_cs_player* player)
+	{
+		if (!player->is_alive() || player->has_gun_game_immunity())
+			return;
+		
+		auto esp = ESP->get_esp_player(player->index());
+		if (skip)
 		{
-			if (!player->is_alive() || player->has_gun_game_immunity())
+			if (!esp->valid)
 				return;
+		}
 
-			auto esp = ESP->get_esp_player(player->index());
-			if (skip)
-			{
-				if (player->dormant())
-					return;
-			}
-			else
-			{
-				if (!esp->valid)
-					return;
-			}
+		auto valid_dormant = player->dormant() && (std::abs(esp->dormant.time - HACKS->global_vars->curtime) < 5.f);
 
-			auto valid_dormant = player->dormant() && (std::abs(esp->dormant.time - HACKS->global_vars->curtime) < 5.f);
+		auto base_origin = valid_dormant && esp->dormant.origin.valid() ? esp->dormant.origin : player->get_abs_origin();
+		base_origin += vec3_t(0.f, 0.f, player->view_offset().z / 2.f);
 
-			auto base_origin = valid_dormant && esp->dormant.origin.valid() ? esp->dormant.origin : player->get_abs_origin();
-			base_origin += vec3_t(0.f, 0.f, player->view_offset().z / 2.f);
+		vec2_t origin = {};
+		RENDER->world_to_screen(base_origin, origin);
 
-			vec2_t origin = {};
-			RENDER->world_to_screen(base_origin, origin);
+		auto angle = math::calc_angle(local_eye_pos, base_origin);
 
-			auto angle = math::calc_angle(local_eye_pos, base_origin);
-
-			float dist = local_distance ? math::get_fov(view_angles, angle) : center.dist_to(origin);
-			if (dist < best_dist)
-			{
-				best = player;
-				best_dist = dist;
-			}
-		});
+		float dist = local_distance ? math::get_fov(view_angles, angle) : center.dist_to(origin);
+		if (dist < best_dist)
+		{
+			best = player;
+			best_dist = dist;
+		}
+	});
 
 	return best;
 }
@@ -490,7 +485,7 @@ bool c_anti_aim::is_peeking()
 {
 	auto updated_vars = ANIMFIX->get_local_anims();
 
-	if (!updated_vars || !HACKS->local || !HACKS->weapon || !HACKS->weapon_info
+	if (!updated_vars || !HACKS->local || !HACKS->weapon || !HACKS->weapon_info 
 		|| !updated_vars->foot_yaw || !HACKS->in_game || HACKS->client_state->delta_tick == -1)
 		return false;
 
@@ -570,7 +565,7 @@ bool c_anti_aim::is_peeking()
 
 				HACKS->local->set_abs_origin(predicted_eye_pos);
 				auto eyepos_awall = penetration::simulate(player, HACKS->local, player->get_eye_position(), predicted_eye_pos, false, true);
-				//	HACKS->debug_overlay->add_text_overlay(predicted_eye_pos, 0.1f, "%d", eyepos_awall);
+			//	HACKS->debug_overlay->add_text_overlay(predicted_eye_pos, 0.1f, "%d", eyepos_awall);
 
 				for (auto& i : hitbox_list)
 				{
@@ -578,7 +573,7 @@ bool c_anti_aim::is_peeking()
 					HACKS->local->set_abs_origin(hitbox_position);
 					auto awall = penetration::simulate(player, HACKS->local, player->get_eye_position(), hitbox_position, false, true);
 
-					//	HACKS->debug_overlay->add_text_overlay(hitbox_position, 0.1f, "! %d", awall.damage);
+				//	HACKS->debug_overlay->add_text_overlay(hitbox_position, 0.1f, "! %d", awall.damage);
 					if (eyepos_awall.damage >= 1 || awall.damage >= 1)
 					{
 						can_peek = true;
@@ -661,33 +656,36 @@ void c_anti_aim::run_movement()
 void c_anti_aim::run()
 {
 	auto update_tickbase_state = [&]()
+	{
+#ifndef LEGACY
+		static int old_tickbase = 0;
+
+		if (!EXPLOITS->enabled() || (EXPLOITS->get_exploit_mode() != EXPLOITS_DT) || EXPLOITS->cl_move.trigger && EXPLOITS->cl_move.shifting || cmd_shift::shifting)
 		{
-			static int old_tickbase = 0;
+			//	g_ctx.cmd->viewangles.x = g_ctx.orig_angle.x;
 
-			if (!EXPLOITS->enabled() || (EXPLOITS->get_exploit_mode() != EXPLOITS_DT) || EXPLOITS->cl_move.trigger && EXPLOITS->cl_move.shifting || cmd_shift::shifting)
-			{
-				//	g_ctx.cmd->viewangles.x = g_ctx.orig_angle.x;
+			defensive_aa = false;
+			old_tickbase = 0;
+			return;
+		}
 
-				defensive_aa = false;
-				old_tickbase = 0;
-				return;
-			}
+		auto tickbase_diff = HACKS->local->tickbase() - old_tickbase;
 
-			auto tickbase_diff = HACKS->local->tickbase() - old_tickbase;
+		//GET DEFENSIVE 
+		switch (g_cfg.antihit.def_aa_mode)
+		{
+		case 0: //TRIGGER
+			defensive_aa = tickbase_diff < 0 || tickbase_diff > 1; 
+			break;
+		case 1: //ALWAYS ON
+			defensive_aa = EXPLOITS->defensive.tickbase_choke != 100
+				&& EXPLOITS->defensive.tickbase_choke > g_cfg.antihit.ticks_defensive && HACKS->client_state->choked_commands;
+			break;
+		}
 
-			switch (g_cfg.antihit.def_aa_mode)
-			{
-			case 0:
-				defensive_aa = tickbase_diff < 0 || tickbase_diff > 1;
-				break;
-			case 1:
-				defensive_aa = EXPLOITS->defensive.tickbase_choke != 100
-					&& EXPLOITS->defensive.tickbase_choke > 0 && HACKS->client_state->choked_commands;
-				break;
-			}
-
-			old_tickbase = HACKS->local->tickbase();
-		};
+		old_tickbase = HACKS->local->tickbase();
+#endif
+	};
 
 	update_tickbase_state();
 
@@ -729,6 +727,10 @@ void c_anti_aim::run()
 	auto moving = holding_w || holding_a || holding_s || holding_d;
 	float add_roll = g_cfg.antihit.distortion_pitch;
 
+	static int tick = 0;
+	static int delayjitter = 0;
+	static int delay = 0;
+	//DEFENSIVE PITCH
 	switch (g_cfg.antihit.pitch)
 	{
 	case 1:
@@ -736,24 +738,40 @@ void c_anti_aim::run()
 		if (g_cfg.antihit.def_pitch && defensive_aa)
 		{
 			math::random_seed(HACKS->global_vars->tickcount);
-			HACKS->cmd->viewangles.x = g_cfg.antihit.def_aa_mode == 1 ? 0.f : -89.f;
+
+			if (g_cfg.antihit.def_pitch_mode == 0)
+				devesiveblyat:HACKS->cmd->viewangles.x = g_cfg.antihit.custom_pitch;
+
+			if (g_cfg.antihit.def_pitch_mode == 1)
+				randomsuka:HACKS->cmd->viewangles.x = g_cfg.antihit.def_aa_mode == 1 ? math::random_float(g_cfg.antihit.random_pitch, g_cfg.antihit.random_pitch2) : -89.0f;
+			if (g_cfg.antihit.def_pitch_mode == 2)
+				switchblyat:switch (tick %= 2)
+				{
+				case 0:
+					HACKS->cmd->viewangles.x = g_cfg.antihit.switch_pitch;
+					break;
+				case 1:
+					HACKS->cmd->viewangles.x = g_cfg.antihit.switch_pitch2;
+					break;
+
+				}
+
+			if (g_cfg.antihit.def_pitch_mode == 3)
+				waychlen:switch (tick %= 3)
+				{
+				case 0:
+					HACKS->cmd->viewangles.x = g_cfg.antihit.way_pitch;
+					break;
+				case 1:
+					HACKS->cmd->viewangles.x = g_cfg.antihit.way_pitch2;
+					break;
+
+				}
+		
 		}
 		else
 		{
-#ifndef LEGACY
-			if (g_cfg.antihit.distortion_pitch > 0.f && choke_amount >= 14)
-			{
-				const auto choke = HACKS->client_state->choked_commands + 1;
-				for (int i = 1; i <= choke; i++)
-				{
-					auto cmds = HACKS->input->get_user_cmd(HACKS->cmd->command_number - choke + i);
-
-					cmds->viewangles.x = 89.f + add_roll;
-				}
-			}
-			else
-#endif
-				HACKS->cmd->viewangles.x = 89.f;
+				HACKS->cmd->viewangles.x = 89.f; //Äåôîëòíûé ïèò÷
 		}
 	}
 	break;
@@ -774,55 +792,55 @@ void c_anti_aim::run()
 	static int tick = 0;
 
 	auto do_real = [&]()
+	{
+		at_targets();
+		automatic_edge();
+		freestanding();
+		manual_yaw();
+
+		switch (g_cfg.antihit.yaw)
 		{
-			at_targets();
-			automatic_edge();
-			freestanding();
-			manual_yaw();
+		case 1:
+			best_yaw += 180.f;
+			break;
+		case 2:
+			best_yaw += 360.f + 90.f + std::fmod(HACKS->global_vars->curtime * 360.f, 180.f);
+			break;
+		}
 
-			switch (g_cfg.antihit.yaw)
+		float range = g_cfg.antihit.jitter_range * 0.5f;
+
+		switch (g_cfg.antihit.jitter_mode)
+		{
+		case 1:
+			best_yaw += flip_jitter ? range : -range;
+			break;
+		case 2:
+			if (!flip_jitter)
+				best_yaw += g_cfg.antihit.jitter_range;
+			break;
+		case 3:
+			best_yaw += math::random_float(-g_cfg.antihit.jitter_range, g_cfg.antihit.jitter_range);
+			break;
+		case 4:
+		{
+			switch (tick)
 			{
-			case 1:
-				best_yaw += 180.f;
+			case 0:
+				best_yaw -= g_cfg.antihit.jitter_range;
 				break;
 			case 2:
-				best_yaw += 360.f + 90.f + std::fmod(HACKS->global_vars->curtime * 360.f, 180.f);
+				best_yaw += g_cfg.antihit.jitter_range;
 				break;
 			}
+		}break;
+		}
 
-			float range = g_cfg.antihit.jitter_range * 0.5f;
+		if (!(g_cfg.binds[left_b].toggled || g_cfg.binds[right_b].toggled || g_cfg.binds[back_b].toggled))
+			best_yaw += g_cfg.antihit.yaw_add;
 
-			switch (g_cfg.antihit.jitter_mode)
-			{
-			case 1:
-				best_yaw += flip_jitter ? range : -range;
-				break;
-			case 2:
-				if (!flip_jitter)
-					best_yaw += g_cfg.antihit.jitter_range;
-				break;
-			case 3:
-				best_yaw += math::random_float(-g_cfg.antihit.jitter_range, g_cfg.antihit.jitter_range);
-				break;
-			case 4:
-			{
-				switch (tick)
-				{
-				case 0:
-					best_yaw -= g_cfg.antihit.jitter_range;
-					break;
-				case 2:
-					best_yaw += g_cfg.antihit.jitter_range;
-					break;
-				}
-			}break;
-			}
-
-			if (!(g_cfg.binds[left_b].toggled || g_cfg.binds[right_b].toggled || g_cfg.binds[back_b].toggled))
-				best_yaw += g_cfg.antihit.yaw_add;
-
-			HACKS->cmd->viewangles.y = math::normalize_yaw(best_yaw);
-		};
+		HACKS->cmd->viewangles.y = math::normalize_yaw(best_yaw);
+	};
 
 	auto stand = g_cfg.binds[sw_b].toggled || HACKS->local->velocity().length_2d() < 10.f;
 	auto anim = ANIMFIX->get_local_anims();
@@ -887,9 +905,7 @@ void c_anti_aim::run()
 		break;
 	}
 
-	static int tick = 0;
-
-	float range = g_cfg.antihit.jitter_range * 0.5f;
+	float range = g_cfg.antihit.jitter_range * 1.f;
 
 	auto jitter_flipper = g_cfg.antihit.random_jitter ? random_flipper : flip_jitter;
 
@@ -917,6 +933,49 @@ void c_anti_aim::run()
 			break;
 		}
 	}break;
+	case 5:
+	{
+		switch (delay)
+		{	
+		case 0:
+			best_yaw -= g_cfg.antihit.jitter_range;
+			break;
+		case 1:
+			best_yaw -= g_cfg.antihit.jitter_range / 2;
+			break;
+		case 3:
+			best_yaw += g_cfg.antihit.jitter_range / 2;
+			break;
+		case 4:
+			best_yaw += g_cfg.antihit.jitter_range;
+			break;
+		}
+	}break;
+	case 6:
+	{
+		switch (delayjitter)
+		{
+		case 0:
+			best_yaw -= g_cfg.antihit.jitter_range;
+			break;
+		case 1:
+			best_yaw -= g_cfg.antihit.jitter_range;
+			break;
+		case 2:
+			best_yaw -= g_cfg.antihit.jitter_range;
+			break;
+		case 3:
+			best_yaw += g_cfg.antihit.jitter_range;
+			break;
+		case 4:
+			best_yaw += g_cfg.antihit.jitter_range;
+			break;
+		case 5:
+			best_yaw += g_cfg.antihit.jitter_range;
+			break;
+		}
+	}break;
+
 	}
 
 	if (*HACKS->send_packet)
@@ -924,13 +983,13 @@ void c_anti_aim::run()
 		math::random_seed(HACKS->global_vars->tickcount);
 
 		auto make_random_timer = [&](bool& flipper, int& timer, int min, int max)
+		{
+			if (std::abs(HACKS->global_vars->tickcount - timer) > math::random_int(min, max))
 			{
-				if (std::abs(HACKS->global_vars->tickcount - timer) > math::random_int(min, max))
-				{
-					timer = HACKS->global_vars->tickcount;
-					flipper = !flipper;
-				}
-			};
+				timer = HACKS->global_vars->tickcount;
+				flipper = !flipper;
+			}
+		};
 
 		make_random_timer(random_dsy_flipper, dsy_duration, 1, 4);
 		make_random_timer(random_flipper, duration, 2, 5);
@@ -940,17 +999,69 @@ void c_anti_aim::run()
 
 		++tick;
 		tick %= 3;
+
+		++delay;
+		delay %= 5;
+
+		++delayjitter;
+		delayjitter %= 6;
 	}
 
 	if (!(g_cfg.binds[left_b].toggled || g_cfg.binds[right_b].toggled || g_cfg.binds[back_b].toggled))
 		best_yaw += g_cfg.antihit.yaw_add;
 
+
+	//DEFENSIVE YAW
 	if (g_cfg.antihit.def_yaw && defensive_aa)
 	{
-		math::random_seed(HACKS->global_vars->tickcount);
-		best_yaw += HACKS->global_vars->tickcount % 16 * (360 / 16) - 180;
-	}
+		switch (g_cfg.antihit.sukablyat)
+		{
 
+		case 0:
+
+			break;
+		case 1:
+			best_yaw += HACKS->global_vars->tickcount = 180;
+			break;
+		case 2:
+		{
+			switch (tick %= 2)
+			{
+			case 0:
+				best_yaw += HACKS->global_vars->tickcount = -90;
+				break;
+			case 1:
+				best_yaw += HACKS->global_vars->tickcount = 90;
+				break;
+			}
+			break;
+		}
+		case 3:
+			math::random_seed(HACKS->global_vars->tickcount);
+			best_yaw += HACKS->global_vars->tickcount * (7 % 359) - 179;
+			break;
+		case 4:
+			math::random_seed(HACKS->global_vars->tickcount);
+			best_yaw += HACKS->global_vars->tickcount * (15 % 359) - 179;
+			break;
+		case 5:
+
+			switch (tick %= 3)
+			{
+			case 0:
+				best_yaw += HACKS->global_vars->tickcount = -90;
+				break;
+			case 1:
+				best_yaw += HACKS->global_vars->tickcount = 90;
+				break;
+			}
+			break;
+
+		case 6:
+			best_yaw += HACKS->global_vars->tickcount = math::random_float(179, -179);
+			break;
+		}
+	}
 	HACKS->cmd->viewangles.y = math::normalize_yaw(best_yaw);
 #endif
 }

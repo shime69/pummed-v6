@@ -233,15 +233,24 @@ struct configs_t
 		bool enable{};
 
 		bool auto_fire{};
+		bool air_defensive{};
+		bool always_defensive{};
+		bool delay_lc{};
 		bool resolver{};
+
+#if ALPHA || _DEBUG || BETA
+		bool jitterfix{};
+		int jitterfix_method{};
+
+		bool round_lagcomp{};
+		bool delay_on_breaklc{};
+#endif
 
 		int spike_amt{};
 		int roll_amt = 50;
 		int roll_amt_pitch = 0;
 
 		int group_type{};
-
-		unsigned int defensive_options{};
 
 		std::array< rage_weapon_t, 6 > weapon{};
 	} rage;
@@ -264,9 +273,11 @@ struct configs_t
 		std::array< legit_weapon_t, weapon_cfg_max > legit_weapon{};
 	} legit;
 
+
 	struct anti_hit_t
 	{
 		bool enable{};
+		//int allah{};
 
 		int pitch{};
 		int yaw{};
@@ -274,11 +285,23 @@ struct configs_t
 		bool at_targets{};
 
 		bool def_pitch{};
+		int custom_pitch{};
+		int custom_pitch2{};
+		int random_pitch{};
+		int random_pitch2{};
+		int switch_pitch{};
+		int switch_pitch2{};
+		int way_pitch{};
+		int way_pitch2{};
+		//int switch_pitch_delay{};
 		bool def_yaw{};
+		int ticks_defensive{};
 		bool random_jitter{};
 		bool random_dsy{};
 		bool random_amount{};
 
+		int sukablyat{};
+		int def_pitch_mode{};
 		int def_aa_mode{};
 
 		bool desync{};
@@ -398,6 +421,7 @@ struct configs_t
 		int scope_amt = 50;
 		int attachments_amt = 100;
 
+		char cheat_username[32]{};
 		bool impacts{};
 
 		c_float_color server_clr = c_float_color(0, 0, 255, 127);
@@ -465,6 +489,10 @@ struct configs_t
 		bool force_radar{};
 
 		int ragdoll_gravity{};
+		bool pizdobriker1{};
+		int ground_legs{};
+		int air_legs{};
+		unsigned int pizdobriker{};
 
 		bool clantag{};
 		bool bypass_sv_pure{};

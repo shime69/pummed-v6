@@ -599,7 +599,7 @@ namespace hooks::vmt
 					FAKE_LAG->update_shot_cmd();
 				}
 				ENGINE_PREDICTION->end();
-				EXPLOITS->correct_charge(cmd);
+				//EXPLOITS->correct_charge(cmd);
 				ANTI_AIM->cleanup();
 				MOVEMENT->rotate_movement(HACKS->cmd, MOVEMENT->get_base_angle());
 				ANIMFIX->update_local();
