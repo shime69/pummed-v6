@@ -1,7 +1,7 @@
 #include "globals.hpp"
 #include "legacy ui/legacy_str.h"
 #include "features.hpp"
-
+#include "discord_rpc_init.h"
 #ifndef _DEBUG
 
 #endif
@@ -38,6 +38,9 @@ INLINE void remove_listeners()
 	LISTENER_EVENT->remove();
 }
 
+
+Discord* g_Discord;
+
 void c_hacks::init_local_player()
 {
 	local = **offsets::local.cast<c_cs_player***>();
@@ -73,6 +76,9 @@ void c_hacks::init(LPVOID reserved)
 
 	while (!WINCALL(GetModuleHandleA)(CXOR("serverbrowser.dll")))
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+	g_Discord->Initialize();
+	g_Discord->Update();
 
 	DEBUG_LOG(" [+] Modules \n");
 	modules.init(false);
