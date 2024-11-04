@@ -2,48 +2,6 @@
 #include "event_logs.hpp"
 #include "imgui/imgui.h"
 
-void c_event_logs::on_player_death(c_game_event* event)
-{
-	if (!g_cfg.misc.killsay)
-		return;
-
-	auto attacker = HACKS->engine->get_player_for_user_id(event->get_int(CXOR("attacker")));
-	if (HACKS->local->index() != attacker)
-		return;
-
-	auto user_id = HACKS->engine->get_player_for_user_id(event->get_int(CXOR("userid")));
-	auto player = (c_cs_player*)HACKS->entity_list->get_client_entity(user_id);
-
-	if (!player)
-		return;
-
-	if (player->is_teammate())
-		return;
-
-	auto health = event->get_int(CXOR("health"));
-	if (health != 0)
-		return;
-
-	std::vector<std::string> killsay_messages = {
-		"pummed is like honda - cheap, reliable, always working.",
-		"pummed or napunjen - it's your choice.",
-		"pummed has been approved by nebojsa covic.",
-		"general sponsor of partizan and red star is pummed.",
-		"pummed - equipped with backtrack to mexico.",
-		"ratko mladic used pummed and resolved all croats.",
-		"crni cerak izi money pummed na mafiju radi",
-		"јебе жене - курац ко у младог бика, pummed чини најјачег војника.",
-		"lagcomp millionar original - all pummed users",
-		"want to resolve marriage problems? buy pummed.",
-		"child support? no, i support pummed ◣ _ ◢",
-		"they call me moses of the hvh cuz im parting your head with that little peanut of a brain you got",
-	};
-
-	const auto random_index = std::rand() % killsay_messages.size();
-	const auto cmd = tfm::format(CXOR("say %s"), killsay_messages[random_index].c_str());
-	HACKS->engine->execute_client_cmd(cmd.c_str());
-}
-
 void c_event_logs::on_item_purchase(c_game_event* event)
 {
 	if (std::strcmp(event->get_name(), CXOR("item_purchase")) || !HACKS->local)
@@ -134,7 +92,6 @@ void c_event_logs::on_game_events(c_game_event* event)
 	on_player_hurt(event);
 	on_bomb_plant(event);
 	on_item_purchase(event);
-	on_player_death(event);
 }
 
 void c_event_logs::filter_console()

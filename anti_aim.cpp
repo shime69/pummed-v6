@@ -286,7 +286,7 @@ void c_anti_aim::freestanding()
 	auto update_dir = [&]()
 	{
 		constexpr float STEP{ 4.f };
-		constexpr float RANGE{ 20.f };
+		constexpr float RANGE{ 10.f };
 
 		auto anim = ANIMFIX->get_local_anims();
 

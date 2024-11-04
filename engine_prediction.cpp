@@ -3,6 +3,9 @@
 #include "exploits.hpp"
 #include "predfix.hpp"
 
+// this thing fixes delays in cmd processing
+// so you set latest vars & cmd params and get latest data you need for better accuracy 
+
 void c_engine_prediction::update()
 {
 	if (HACKS->client_state->signon_state < 6)
@@ -12,7 +15,76 @@ void c_engine_prediction::update()
 		HACKS->client_state->delta_tick > 0,
 		HACKS->client_state->last_command_ack,
 		HACKS->client_state->last_outgoing_command + HACKS->client_state->choked_commands);
+	c_engine_prediction::perform_prediction();
 }
+bool c_engine_prediction::perform_prediction() // Skeet.
+{
+	// Maybe useless but that skeet does.
+	for (int i{}; ; ++i)
+	{
+
+		// Outgoing_acknowledged is the last usercmd the server outgoing command having acted upon
+		int outgoing_command = HACKS->client_state->last_outgoing_command + HACKS->client_state->choked_commands;
+
+		// Incoming_acknowledged is the last usercmd the server acknowledged having acted upon
+		int current_command = HACKS->client_state->last_command_ack + i;
+
+		// We've caught up to the current command
+		if (current_command > outgoing_command || i >= 150)
+			break;
+
+		if (!HACKS->cmd)
+			break;
+
+		// UWU ^^
+		// Still crashes...
+		// valve::g_prediction->run_simulation( current_command, curtime, user_cmd, valve::g_local_player );
+
+		HACKS->global_vars->curtime = TICKS_TO_TIME(HACKS->tickbase);
+		HACKS->global_vars->frametime = HACKS->local->flags().has(FL_FROZEN) ? 0.f : HACKS->global_vars->interval_per_tick;
+
+		if (current_command == outgoing_command)
+			HACKS->local->final_predicted_tick() = HACKS->local->tickbase();
+
+		// Mark that we issued any needed sounds, of not done already
+		//user_cmd->m_predicted = true;
+
+		// Copy the state over
+		i++;
+	}
+
+	return true;
+}
+
+class c_movedata
+{
+public:
+	bool run_out_of_functions : 1;
+	bool game_code_moved_player : 1;
+	int player_handle;
+	int impulse_command;
+	vec3_t view_angles;
+	vec3_t abs_view_angles;
+	int buttons;
+	int old_buttons;
+	float forward_move;
+	float side_move;
+	float up_move;
+	float max_speed;
+	float client_max_speed;
+	vec3_t velocity;
+	vec3_t angles;
+	vec3_t old_angle;
+	float step_height;
+	vec3_t wish_vel;
+	vec3_t jump_vel;
+	vec3_t constraint_center;
+	float constraint_radius;
+	float constraint_width;
+	float constraint_speed_factor;
+	bool constratint_past_radius;
+	vec3_t abs_origin;
+};
 
 void c_engine_prediction::start()
 {
@@ -40,9 +112,14 @@ void c_engine_prediction::start()
 
 	auto old_tickbase = HACKS->local->tickbase();
 
+#ifndef LEGACY
 	std::memset(&move_data, 0, sizeof(c_move_data));
 	HACKS->cmd->buttons.force(HACKS->local->button_forced());
 	HACKS->cmd->buttons.remove(HACKS->local->button_disabled());
+#else
+	static c_movedata movedata{};
+	std::memset(&movedata, 0, sizeof(c_movedata));
+#endif
 
 	auto& net_vars = networked_vars[HACKS->cmd->command_number % 150];
 	net_vars.ground_entity = HACKS->local->ground_entity();
@@ -50,9 +127,22 @@ void c_engine_prediction::start()
 	HACKS->game_movement->start_track_prediction_errors(HACKS->local);
 	HACKS->move_helper->set_host(HACKS->local);
 
+#ifdef LEGACY
+	* (c_user_cmd**)((std::uintptr_t)HACKS->local + XORN(0x3314)) = HACKS->cmd;
+	*(c_user_cmd*)((std::uintptr_t)HACKS->local + XORN(0x326C)) = *HACKS->cmd;
+#else
 	* (c_user_cmd**)((std::uintptr_t)HACKS->local + XORN(0x3348)) = HACKS->cmd;
 	*(c_user_cmd*)((std::uintptr_t)HACKS->local + XORN(0x3298)) = *HACKS->cmd;
+#endif
 
+#ifdef LEGACY
+	const auto buttons = HACKS->cmd->buttons.bits;
+	int buttonsChanged = buttons ^ *reinterpret_cast<int*>(uintptr_t(HACKS->local) + 0x31E8);
+	*reinterpret_cast<int*>(uintptr_t(HACKS->local) + 0x31DC) = (uintptr_t(HACKS->local) + 0x31E8);
+	*reinterpret_cast<int*>(uintptr_t(HACKS->local) + 0x31E8) = buttons;
+	*reinterpret_cast<int*>(uintptr_t(HACKS->local) + 0x31E0) = buttons & buttonsChanged;  // m_afButtonPressed ~ The changed ones still down are "pressed"
+	*reinterpret_cast<int*>(uintptr_t(HACKS->local) + 0x31E4) = buttonsChanged & ~buttons; // m_afButtonReleased ~ The ones not down are "released"
+#else
 	HACKS->cmd->buttons.force(HACKS->local->button_forced());
 	HACKS->cmd->buttons.remove(HACKS->local->button_disabled());
 
@@ -64,6 +154,7 @@ void c_engine_prediction::start()
 	*HACKS->local->buttons() = buttons;
 	HACKS->local->button_pressed() = buttons_changed & buttons;
 	HACKS->local->button_released() = buttons_changed & (~buttons);
+#endif
 
 	HACKS->prediction->check_moving_ground(HACKS->local, HACKS->global_vars->frametime);
 	HACKS->prediction->set_local_view_angles(HACKS->cmd->viewangles);
@@ -71,9 +162,17 @@ void c_engine_prediction::start()
 	HACKS->local->run_pre_think();
 	HACKS->local->run_think();
 
+#ifdef LEGACY
+	HACKS->move_helper->set_host(HACKS->local);
+	HACKS->prediction->setup_move(HACKS->local, HACKS->cmd, HACKS->move_helper, &movedata);
+	HACKS->game_movement->process_movement(HACKS->local, (c_move_data*)&movedata);
+	HACKS->prediction->finish_move(HACKS->local, HACKS->cmd, &movedata);
+#else
+
 	HACKS->prediction->setup_move(HACKS->local, HACKS->cmd, HACKS->move_helper, &move_data);
 	HACKS->game_movement->process_movement(HACKS->local, &move_data);
 	HACKS->prediction->finish_move(HACKS->local, HACKS->cmd, &move_data);
+#endif
 
 	HACKS->move_helper->process_impacts();
 
@@ -156,6 +255,8 @@ void c_engine_prediction::fix_viewmodel(int stage)
 	if (!viewmodel)
 		return;
 
+	//printf("%s \n", viewmodel->get_client_class()->network_name);
+
 	auto command = HACKS->client_state->command_ack;
 	auto current_viewmodel = &viewmodel_info[command % 150];
 	if (current_viewmodel->cmd_tick != command)
@@ -215,7 +316,11 @@ void c_engine_prediction::end()
 {
 	in_prediction = false;
 
+#ifdef LEGACY
+	* (c_user_cmd**)((std::uintptr_t)HACKS->local + XORN(0x3314)) = nullptr;
+#else
 	* (c_user_cmd**)((std::uintptr_t)HACKS->local + XORN(0x3348)) = nullptr;
+#endif
 
 	* prediction_random_seed = -1;
 	*prediction_player = 0;

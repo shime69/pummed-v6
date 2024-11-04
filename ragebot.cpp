@@ -1121,7 +1121,7 @@ void c_ragebot::choose_best_point()
 							point.found = true;
 							return point;
 						}
-						else if (is_body && (point.damage >= player->health() || prefer_baim_on_dt || rage_config.prefer_body))
+						else if (is_body && (point.damage >= player->health() /* || prefer_baim_on_dt */|| rage_config.prefer_body))
 						{
 							point.found = true;
 							return point;
