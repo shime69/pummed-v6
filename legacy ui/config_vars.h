@@ -401,6 +401,7 @@ struct configs_t
 		bool auto_strafe{};
 
 		bool fast_stop{};
+		bool killsay{};
 		bool slide_walk{};
 
 		int fovs[3] = { 0, 0, 100 };

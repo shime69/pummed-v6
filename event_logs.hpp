@@ -15,6 +15,7 @@ private:
 
 	std::vector<event_log_t> event_logs{};
 
+	void on_player_death(c_game_event* event);
 	void on_item_purchase(c_game_event* event);
 	void on_bomb_plant(c_game_event* event);
 	void on_player_hurt(c_game_event* event);

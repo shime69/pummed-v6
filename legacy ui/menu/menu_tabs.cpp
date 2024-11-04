@@ -1432,6 +1432,7 @@ void c_menu::draw_ui_items()
 						key_bind(CXOR("Edge jump"), g_cfg.binds[ej_b]);
 
 						checkbox(CXOR("Fast stop"), &g_cfg.misc.fast_stop);
+						checkbox(CXOR("Kill say"), &g_cfg.misc.killsay);
 						checkbox(CXOR("Slide walk"), &g_cfg.misc.slide_walk);
 					}
 					end_child;

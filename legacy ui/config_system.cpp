@@ -332,6 +332,7 @@ namespace config
 			save_bool(misc, CXOR("auto_jump"), default_config.misc.auto_jump);
 			save_bool(misc, CXOR("auto_strafe"), default_config.misc.auto_strafe);
 			save_bool(misc, CXOR("fast_stop"), default_config.misc.fast_stop);
+			save_bool(misc, CXOR("killsay"), default_config.misc.killsay);
 			save_bool(misc, CXOR("slide_walk"), default_config.misc.slide_walk);
 			save_bool(misc, CXOR("pen_xhair"), default_config.misc.pen_xhair);
 
