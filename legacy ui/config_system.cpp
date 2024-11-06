@@ -1050,6 +1050,8 @@ namespace config
 			load_int(misc, CXOR("impact_size"), g_cfg.misc.impact_size);
 			load_clr(misc, CXOR("server_clr"), g_cfg.misc.server_clr);
 			load_clr(misc, CXOR("client_clr"), g_cfg.misc.client_clr);
+			load_clr(misc, CXOR("prn_cs"), g_cfg.misc.prn_cs);
+			load_clr(misc, CXOR("prn_cts"), g_cfg.misc.prn_cts);
 
 			load_uint(misc, CXOR("tracers"), g_cfg.misc.tracers);
 			load_int(misc, CXOR("tracer_type"), g_cfg.misc.tracer_type);

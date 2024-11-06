@@ -365,6 +365,8 @@ const char* hitsound[]
 {
 	xor_strs::aa_disabled.c_str(),
 	xor_strs::sound_metallic.c_str(),
+	xor_strs::sound_primordial.c_str(),
+	xor_strs::sound_roblox.c_str(),
 	xor_strs::sound_tap.c_str(),
 };
 
@@ -1158,6 +1160,11 @@ void c_menu::draw_ui_items()
 					begin_child(CXOR("Crosshair    "))
 					{
 						checkbox(CXOR("Penetration crosshair"), &g_cfg.misc.pen_xhair);
+						if (g_cfg.misc.pen_xhair)
+						{
+							color_picker(CXOR("Penetration color 1"), g_cfg.misc.prn_cs);
+							color_picker(CXOR("Penetration color 2"), g_cfg.misc.prn_cts);
+						}
 						checkbox(CXOR("Force crosshair on sniper"), &g_cfg.misc.snip_crosshair);
 						checkbox(CXOR("Fix zoom sensitivity"), &g_cfg.misc.fix_sensitivity);
 					}
@@ -1494,7 +1501,7 @@ void c_menu::draw_ui_items()
 						combo(CXOR("Hitsound"), &g_cfg.misc.sound, hitsound, IM_ARRAYSIZE(hitsound));
 						slider_int(CXOR("Volume"), &g_cfg.misc.sound_volume, 0, 100, CXOR("%d%%"));
 
-						if (g_cfg.misc.sound == 2)
+						if (g_cfg.misc.sound == 4)
 							input_text(CXOR("Sound name"), g_cfg.misc.sound_name, 128);
 
 						checkbox(CXOR("Damage indicator"), &g_cfg.misc.damage);

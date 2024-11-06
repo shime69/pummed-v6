@@ -100,6 +100,8 @@ namespace xor_strs
 	extern std::string chams_gloves;
 
 	extern std::string sound_metallic;
+	extern std::string sound_primordial;
+	extern std::string sound_roblox;
 	extern std::string sound_tap;
 
 	extern std::string box_default;

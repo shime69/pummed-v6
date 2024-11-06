@@ -8,6 +8,9 @@ extern unsigned char SFUIDisplay_Bold[181484];
 extern unsigned int qo0icons_compressed_data[38584 / 4];
 extern unsigned char cheatLogo[22820];
 
+extern unsigned char primordialsound[294990];
+extern unsigned char robloxsound[270892];
+
 extern unsigned char eclipse_tab_icon[5538];
 extern unsigned char rage_icon[366];
 extern unsigned char antihit_icon[434];

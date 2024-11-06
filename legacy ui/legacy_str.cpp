@@ -95,6 +95,8 @@ namespace xor_strs
 	std::string chams_gloves{};
 
 	std::string sound_metallic{};
+	std::string sound_primordial{};
+	std::string sound_roblox{};
 	std::string sound_tap{};
 
 	std::string box_default{};
@@ -468,7 +470,10 @@ namespace xor_strs
 		chams_gloves = XOR("Gloves");
 
 		sound_metallic = XOR("Metallic");
+		sound_primordial = XOR("Primordial");
+		sound_roblox = XOR("Windows XP");
 		sound_tap = XOR("Custom");
+		
 
 		box_default = XOR("Default");
 		box_thin = XOR("Thin");

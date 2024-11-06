@@ -90,6 +90,8 @@ INLINE void modify_volume_sound(char* bytes, ptrdiff_t file_size, float volume)
 	}
 };
 
+//#include "../bytesarray.hpp"
+
 INLINE void play_sound_from_memory(uint8_t* bytes, size_t size, float volume)
 {
 	if (sound_cache.count(bytes) == 0)
@@ -138,6 +140,10 @@ void c_bullet_tracers::on_player_hurt(c_game_event* event)
 		{
 			if (g_cfg.misc.sound == 1)
 				return false;
+			if (g_cfg.misc.sound == 2)
+				return false;
+			if (g_cfg.misc.sound == 3)
+				return false;
 
 			if (!main_utils::file_exist(new_dir.c_str()))
 				return false;
@@ -157,6 +163,14 @@ void c_bullet_tracers::on_player_hurt(c_game_event* event)
 
 				play_sound_from_memory((uint8_t*)file_bytes, file_size, volume);
 			}
+		}
+		if (g_cfg.misc.sound == 2)
+		{
+			play_sound_from_memory((uint8_t*)primordialsound, 294990, volume);
+		}
+		if (g_cfg.misc.sound == 3)
+		{
+			play_sound_from_memory((uint8_t*)robloxsound, 270892, volume);
 		}
 		else
 			HACKS->engine->execute_client_cmd("play buttons/arena_switch_press_02");

@@ -426,6 +426,8 @@ struct configs_t
 
 		c_float_color server_clr = c_float_color(0, 0, 255, 127);
 		c_float_color client_clr = c_float_color(255, 0, 0, 127);
+		c_float_color prn_cs = c_float_color(0, 255, 0, 255);
+		c_float_color prn_cts = c_float_color(255, 0, 0, 255);
 
 		int impact_size = 10;
 

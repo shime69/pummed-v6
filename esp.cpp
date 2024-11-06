@@ -714,10 +714,11 @@ void c_esp::render_local()
 	if (g_cfg.misc.pen_xhair && !HACKS->weapon->is_misc_weapon())
 	{
 		constexpr auto box_size = 3.f;
-
+		auto pen_cs = g_cfg.misc.prn_cs.base();
+		auto pen_cts = g_cfg.misc.prn_cts.base();
 		auto thread_id = THREAD_POOL->add_task(bullet_for_indicator);
 		auto bullet = std::any_cast<bullet_t>(THREAD_POOL->wait_result(thread_id));
-		auto crosshair_color = bullet.damage > 0 ? c_color{0, 255, 0 } : c_color{ 255, 0, 0 };
+		auto crosshair_color = bullet.damage > 0 ? pen_cs : pen_cts;
 
 		auto center = vec2_t{ RENDER->screen.x / 2, RENDER->screen.y / 2 };
 		auto box_half = box_size * 0.5f;

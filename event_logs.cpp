@@ -75,12 +75,12 @@ void c_event_logs::on_player_hurt(c_game_event* event)
 	auto string_group = main_utils::hitgroup_to_string(group);
 
 	if (group == HITGROUP_GENERIC || group == HITGROUP_GEAR)
-		push_message(tfm::format(CXOR("Hit %s for %d (%d remaining)"), 
+		push_message(tfm::format(CXOR("Registered shot at %s for %d (%d remaining)"), 
 			player->get_name().c_str(),
 			dmg_health, 
 			health));
 	else
-		push_message(tfm::format(CXOR("Hit %s in the %s for %d (%d remaining)"), 
+		push_message(tfm::format(CXOR("Registered shot at %s`%s for %d (%d remaining)"), 
 			player->get_name().c_str(),
 			string_group.c_str(), 
 			dmg_health, 
@@ -180,3 +180,4 @@ void c_event_logs::render_logs()
 		y += text_size.y + (padding * 2) + 2; // Add gap between logs
 	}
 }
+

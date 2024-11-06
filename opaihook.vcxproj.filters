@@ -243,6 +243,12 @@
     <ClCompile Include="legacy ui\legacy_str.cpp">
       <Filter>legacy ui</Filter>
     </ClCompile>
+    <ClCompile Include="discord_rpc_init.cpp" />
+    <ClCompile Include="discord\connection_win.cpp" />
+    <ClCompile Include="discord\discord_register_win.cpp" />
+    <ClCompile Include="discord\discord_rpc.cpp" />
+    <ClCompile Include="discord\rpc_connection.cpp" />
+    <ClCompile Include="discord\serialization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.hpp" />
@@ -505,6 +511,51 @@
     <ClInclude Include="imgui\shader_blur_y.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="discord_rpc_init.h" />
+    <ClInclude Include="discord\rapidjson\error\en.h" />
+    <ClInclude Include="discord\rapidjson\error\error.h" />
+    <ClInclude Include="discord\rapidjson\internal\biginteger.h" />
+    <ClInclude Include="discord\rapidjson\internal\clzll.h" />
+    <ClInclude Include="discord\rapidjson\internal\diyfp.h" />
+    <ClInclude Include="discord\rapidjson\internal\dtoa.h" />
+    <ClInclude Include="discord\rapidjson\internal\ieee754.h" />
+    <ClInclude Include="discord\rapidjson\internal\itoa.h" />
+    <ClInclude Include="discord\rapidjson\internal\meta.h" />
+    <ClInclude Include="discord\rapidjson\internal\pow10.h" />
+    <ClInclude Include="discord\rapidjson\internal\regex.h" />
+    <ClInclude Include="discord\rapidjson\internal\stack.h" />
+    <ClInclude Include="discord\rapidjson\internal\strfunc.h" />
+    <ClInclude Include="discord\rapidjson\internal\strtod.h" />
+    <ClInclude Include="discord\rapidjson\internal\swap.h" />
+    <ClInclude Include="discord\rapidjson\msinttypes\inttypes.h" />
+    <ClInclude Include="discord\rapidjson\msinttypes\stdint.h" />
+    <ClInclude Include="discord\rapidjson\allocators.h" />
+    <ClInclude Include="discord\rapidjson\cursorstreamwrapper.h" />
+    <ClInclude Include="discord\rapidjson\document.h" />
+    <ClInclude Include="discord\rapidjson\encodedstream.h" />
+    <ClInclude Include="discord\rapidjson\encodings.h" />
+    <ClInclude Include="discord\rapidjson\filereadstream.h" />
+    <ClInclude Include="discord\rapidjson\filewritestream.h" />
+    <ClInclude Include="discord\rapidjson\fwd.h" />
+    <ClInclude Include="discord\rapidjson\istreamwrapper.h" />
+    <ClInclude Include="discord\rapidjson\memorybuffer.h" />
+    <ClInclude Include="discord\rapidjson\memorystream.h" />
+    <ClInclude Include="discord\rapidjson\ostreamwrapper.h" />
+    <ClInclude Include="discord\rapidjson\pointer.h" />
+    <ClInclude Include="discord\rapidjson\prettywriter.h" />
+    <ClInclude Include="discord\rapidjson\rapidjson.h" />
+    <ClInclude Include="discord\rapidjson\reader.h" />
+    <ClInclude Include="discord\rapidjson\schema.h" />
+    <ClInclude Include="discord\rapidjson\stream.h" />
+    <ClInclude Include="discord\rapidjson\stringbuffer.h" />
+    <ClInclude Include="discord\rapidjson\writer.h" />
+    <ClInclude Include="discord\backoff.h" />
+    <ClInclude Include="discord\connection.h" />
+    <ClInclude Include="discord\discord_register.h" />
+    <ClInclude Include="discord\discord_rpc.h" />
+    <ClInclude Include="discord\msg_queue.h" />
+    <ClInclude Include="discord\rpc_connection.h" />
+    <ClInclude Include="discord\serialization.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="other">

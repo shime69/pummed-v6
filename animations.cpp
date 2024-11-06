@@ -268,6 +268,7 @@ static INLINE void update_sides(c_cs_player* player, anims_t* anim, anim_record_
 				player->pose_parameter()[6] = 0.f;
 				state->duration_in_air = 0.f;
 				state->duration_in_air = duration_in_air;
+				state->last_update_time = record->sim_time - HACKS->global_vars->interval_per_tick;
 			}
 		}
 	}
