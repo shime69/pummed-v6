@@ -11,6 +11,7 @@
 
 constexpr auto MOLOTOV_ICON = (u8"\uE02E");
 constexpr auto SMOKE_ICON = (u8"\uE02D");
+constexpr auto namelogo = (u8"Pummed");
 constexpr auto MAX_ESP_DISTANCE = 1500.f;
 const auto TIMER_SIZE = vec2_t{ 60.f, 2.f };
 
@@ -730,6 +731,34 @@ void c_esp::render_local()
 	}
 }
 
+void c_esp::draw_crosshair_ind()
+{
+	if (!g_cfg.misc.scopeind)
+		return;
+	RENDER->text(RENDER->screen.x / 2 - 10, RENDER->screen.y / 2 + 8, c_color(g_cfg.misc.ui_color[0], g_cfg.misc.ui_color[1], g_cfg.misc.ui_color[2],255) , FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.bold, "Pum");
+	RENDER->text(RENDER->screen.x / 2 + 10, RENDER->screen.y / 2 + 8, { 255, 255, 255, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.bold, "med");
+	if(!g_cfg.binds[dt_b].toggled)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 15, { 69, 66, 66, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "dt");
+	else if(g_cfg.binds[dt_b].toggled)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 15, { 242, 73, 73, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "dt");
+	if (!g_cfg.binds[hs_b].toggled)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 22, { 69, 66, 66, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "os-aa");
+	else if (g_cfg.binds[hs_b].toggled)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 22, { 181, 181, 181, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "os-aa");
+	if (!g_cfg.binds[override_dmg_b].toggled)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 30, { 69, 66, 66, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "dmg");
+	else if (g_cfg.binds[override_dmg_b].toggled)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 30, { 242, 73, 73, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "dmg");
+	if (!g_cfg.binds[ap_b].toggled)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 38, { 69, 66, 66, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "peek");
+	else if (g_cfg.binds[ap_b].toggled)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 38, { 131, 96, 191, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "peek");
+	if (!g_cfg.binds[freestand_b].toggled)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 46, { 69, 66, 66, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "fs");
+	else if (g_cfg.binds[freestand_b].toggled)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 46, { 131, 96, 191, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "fs");
+}
+
 void c_esp::render()
 {
 	if (HACKS->client_state->delta_tick == -1 || !HACKS->in_game || !HACKS->local)
@@ -742,4 +771,5 @@ void c_esp::render()
 
 	draw_weapon_esp();
 	draw_player_esp();
+	draw_crosshair_ind();
 }

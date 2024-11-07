@@ -1539,6 +1539,7 @@ void c_menu::draw_ui_items()
 					begin_child(CXOR("Menu"))
 					{
 						color_picker(CXOR("Accent color"), g_cfg.misc.ui_color);
+						checkbox(CXOR("Croshair Indicators"), &g_cfg.misc.scopeind);
 						multi_combo(CXOR("Indicators##menu"), g_cfg.misc.menu_indicators, { XOR("Keybind list"), XOR("Bomb"), XOR("Watermark"), XOR("Spectators") });
 						input_text("Username", g_cfg.misc.cheat_username, 32);
 					}

@@ -179,6 +179,7 @@ public:
 
 	void render();
 	void render_local();
+    void draw_crosshair_ind();
 };
 
 #ifdef _DEBUG

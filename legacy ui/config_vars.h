@@ -490,6 +490,8 @@ struct configs_t
 		bool remove_ads{};
 		bool force_radar{};
 
+		bool scopeind{};
+
 		int ragdoll_gravity{};
 		bool pizdobriker1{};
 		int ground_legs{};
@@ -519,6 +521,7 @@ struct configs_t
 		ImVec2 spectators_position{};
 
 		c_float_color ui_color{ 168, 168, 255 };
+		c_color crossind{ 168, 168, 255 };
 	} misc;
 
 	struct skinchanger_t

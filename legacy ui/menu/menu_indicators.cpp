@@ -597,7 +597,7 @@ void c_menu::draw_watermark()
 	auto calculated_ping = HACKS->real_ping == -1.f ? 0 : (int)(HACKS->real_ping * 1000.f);
 	auto ping = tfm::format(CXOR("%dms"), calculated_ping);
 
-	std::string current_username = HACKS->cheat_info.user_name;
+	std::string current_username = g_cfg.misc.cheat_username;
 	auto watermark_string = tfm::format(CXOR("%s | %s | %s | %s"), this->prefix, current_username, cur_time, ping);
 
 	ImGui::PushFont(RENDER->fonts.main.get());
