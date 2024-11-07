@@ -600,11 +600,16 @@ void c_menu::draw_watermark()
 	std::string current_username = g_cfg.misc.cheat_username;
 	auto watermark_string = tfm::format(CXOR("%s | %s | %s | %s"), this->prefix, current_username, cur_time, ping);
 
+	// Calculate text size using your rendering system
+	//c_d3dfont* d3d_font = convert_to_d3dfont(RENDER->fonts.main.get());
+
+	//ImVec2 text_size_im = RENDER->get_text_size(RENDER->fonts.main.get(), watermark_string.c_str());
+	//vec2_t text_size(text_size_im.x, text_size_im.y); // Convert ImVec2 to vec2_t
 	ImGui::PushFont(RENDER->fonts.main.get());
 	ImVec2 text_size = ImGui::CalcTextSize(watermark_string.c_str());
 	ImGui::PopFont();
 
-	static auto window_size = ImVec2(text_size.x + 20.f, 30.f);
+	static auto window_size = ImVec2(text_size.x + 50.f, 30.f);
 	static auto opened = true;
 	static float alpha = 1.f;
 

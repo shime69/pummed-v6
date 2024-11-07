@@ -2,6 +2,26 @@
 #include "event_logs.hpp"
 #include "imgui/imgui.h"
 
+/*std::pair<std::string, color> get_message_prefix_type(int type)
+{
+    auto clr = g_cfg.misc.ui_color.base();
+    switch (type)
+    {
+    case event_hit:
+        return std::make_pair(xor_str("HIT"), clr);
+    case event_miss:
+        return std::make_pair(xor_str("MISS"), color(204, 60, 60));
+    case event_plant:
+        return std::make_pair(xor_str("BOMB"), color(235, 66, 66));
+    case event_server:
+        return std::make_pair(xor_str("SERVER"), clr.decrease(20));
+    case event_buy:
+        return std::make_pair(xor_str("BUY"), clr.decrease(15));
+    default:
+        return {};
+    }
+}*/
+
 void c_event_logs::on_item_purchase(c_game_event* event)
 {
 	if (std::strcmp(event->get_name(), CXOR("item_purchase")) || !HACKS->local)
@@ -180,4 +200,3 @@ void c_event_logs::render_logs()
 		y += text_size.y + (padding * 2) + 2; // Add gap between logs
 	}
 }
-
