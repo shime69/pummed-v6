@@ -1,11 +1,29 @@
 #pragma once
 
+enum message_prefix_t
+{
+	event_hit,
+	event_miss,
+	event_plant,
+	event_server,
+	event_buy
+};
+
 struct event_log_t
 {
 	float life_time{};
 	c_color clr{};
 	std::string message{};
+	int msgtype{};
+
+	float time{};
+
+	float alpha = -1.f;
+
+	std::string text{};
 };
+
+class color;
 
 class c_event_logs 
 {
@@ -13,9 +31,10 @@ private:
 	bool log_value = true;
 	bool set_console = true;
 
+	std::pair< std::string, color > get_message_prefix_type(int type);
 	std::vector<event_log_t> event_logs{};
 
-	void on_player_death(c_game_event* event);
+	//void on_player_death(c_game_event* event);
 	void on_item_purchase(c_game_event* event);
 	void on_bomb_plant(c_game_event* event);
 	void on_player_hurt(c_game_event* event);
