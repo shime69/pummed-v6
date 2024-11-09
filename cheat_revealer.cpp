@@ -15,8 +15,6 @@
 #include "event_logs.hpp"
 #include "interfaces.hpp"
 #include "hacks.hpp"
-#define NET_PUMMED_CODE 469521u
-
 bool c_cheat_revealer::is_using_gamesense(c_svc_msg_voice_data* msg, uint32_t xuid_low)
 {
     // Declare static variables
