@@ -495,8 +495,7 @@ namespace hooks::vmt
 
 		return original(ecx, edx, setup);
 	}
-	#define NET_PUMMED_CODE 469521u
-
+	#define NET_PUMMED_CODE 69572u
 	void send_data_msg(c_voice_communication_data* data)
 	{
 		c_clc_msg_voice_data msg;

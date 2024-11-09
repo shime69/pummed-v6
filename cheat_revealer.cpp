@@ -86,7 +86,7 @@ bool c_cheat_revealer::is_using_pandora(uint16_t pct)
 
 bool c_cheat_revealer::is_using_pummed(uint16_t pct)
 {
-    if (pct == NET_PUMMED_CODE)
+    if (pct == 69572u)
         return true;
 
     return false;
@@ -178,7 +178,9 @@ void c_cheat_revealer::handle_voice(c_svc_msg_voice_data* msg)
                 {
                     esp_info_sender->revealer.update(CHEAT_PUMMED, player_info.xuid_low);
 #ifdef _DEBUG
-                    printf("receiving | name: %s | xuid_low %d, found Pummed user!\n", player_info.name, player_info.xuid_low);
+                    const auto ctx = (c_cs_player*)HACKS->entity_list->get_client_entity(sender_id);
+                    EVENT_LOGS->push_message(tfm::format("[revealer] entity: [%s] | pct: %d [0x%X] [seqb: %d | secn: %d | ucso: %d | xuid_low %d] Found Pummed user\n", ctx->get_name(), msg->voice_data, msg->voice_data,
+                        msg->sequence_bytes, msg->section_number, msg->uncompressed_sample_offset, msg->xuid_low));
 #endif
                 }
                 else
@@ -227,7 +229,7 @@ void c_cheat_revealer::update_tab()
 
                 if (HACKS->local->index() == index)
                 {
-                    *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 4661;
+                    *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2018;
                 }
                 else
                 {
@@ -252,7 +254,7 @@ void c_cheat_revealer::update_tab()
                         *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2015;
                         break;
                     case CHEAT_PUMMED:
-                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 4661;
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2018;
                         break;
                     default:
                         *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2016;
