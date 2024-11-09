@@ -249,6 +249,7 @@
     <ClCompile Include="discord\discord_rpc.cpp" />
     <ClCompile Include="discord\rpc_connection.cpp" />
     <ClCompile Include="discord\serialization.cpp" />
+    <ClCompile Include="cheat_revealer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.hpp" />
@@ -556,6 +557,7 @@
     <ClInclude Include="discord\msg_queue.h" />
     <ClInclude Include="discord\rpc_connection.h" />
     <ClInclude Include="discord\serialization.h" />
+    <ClInclude Include="cheat_revealer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="other">

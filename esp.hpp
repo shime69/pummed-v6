@@ -9,6 +9,7 @@ enum CheatType
     CHEAT_EVOLVE,   // Evolve
     CHEAT_ONETAP,   // Onetap
     CHEAT_PANDORA,  // Pandora
+    CHEAT_NIXWARE,  // Nixware
     CHEAT_NL        // Neverlose
 };
 

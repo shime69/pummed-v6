@@ -14,24 +14,6 @@
 #include "entlistener.hpp"
 #include "event_logs.hpp"
 
-
-/*static bool __fastcall msg_voice_data(void* ecx, void* edx, c_svc_msg_voice_data* message)
-{
-    // получаем оригинал функции
-    static auto original = hooker::get_original(&msg_voice_data);
-
-    // исключаем локального игрока т.к нам нужны данные соперников ну или тиммейтов
-    if (!HACKS->local || HACKS->local->index() == message->client + 1)
-        return original(ecx, edx, message);
-
-    // перехватываем нужные нам данные для ревилера
-    c_cheat_revealer::handle_voice(message);
-
-    // мы получили что хотели,
-    // возвращаем оригинал функции чтобы не ломать работоспособность игры
-    return original(ecx, edx, message);
-}*/
-
 bool c_cheat_revealer::is_using_gamesense(c_svc_msg_voice_data* msg, uint32_t xuid_low)
 {
     // Declare static variables
@@ -86,7 +68,15 @@ bool c_cheat_revealer::is_using_onetap(uint16_t pct)
 
 bool c_cheat_revealer::is_using_pandora(uint16_t pct)
 {
-    if (pct == 0x695B || pct == 0x1B39)
+    if (pct == 0x695B || pct == 0x1B39 || pct == 0xAFF1)
+        return true;
+
+    return false;
+}
+
+bool c_cheat_revealer::is_using_nixware(uint16_t pct)
+{
+    if (pct == 0xBEEF)
         return true;
 
     return false;
@@ -108,7 +98,7 @@ void c_cheat_revealer::handle_voice(c_svc_msg_voice_data* msg)
 
     // could be optimized by doing:
     //ULONGLONG time = GetTickCount64();
-    //const bool should_receive = time - CHEAT_REVEALER->last_receive_ack_time >= 500; // miliseconds
+    //const bool should_receive = time - c_cheat_revealer().last_receive_ack_time >= 500; // miliseconds
 
     int sender_id = msg->client + 1;
     if (sender_id >= 0 && sender_id <= 63)
@@ -128,6 +118,7 @@ void c_cheat_revealer::handle_voice(c_svc_msg_voice_data* msg)
                 const auto using_evolve = is_using_evolve(static_cast<uint16_t>(msg->xuid_low));
                 const auto using_onetap = is_using_onetap(static_cast<uint16_t>(msg->xuid_low));
                 const auto using_pandora = is_using_pandora(static_cast<uint16_t>(msg->xuid_low));
+                const auto using_nixware = is_using_nixware(static_cast<uint16_t>(msg->xuid_low));
 
                 // switch case would be better?
                 if (using_skeet)
@@ -162,7 +153,14 @@ void c_cheat_revealer::handle_voice(c_svc_msg_voice_data* msg)
                 {
                     esp_info_sender->revealer.update(CHEAT_PANDORA, player_info.xuid_low);
 #ifdef _DEBUG
-                    printf("receiving | name: %s | xuid_low %d, found PANDORA user!\n", player_info.name, player_info.xuid_low);
+                    printf("receiving | name: %s | xuid_low %d, found Pandora user!\n", player_info.name, player_info.xuid_low);
+#endif
+                }
+                else if (using_nixware)
+                {
+                    esp_info_sender->revealer.update(CHEAT_NIXWARE, player_info.xuid_low);
+#ifdef _DEBUG
+                    printf("receiving | name: %s | xuid_low %d, found NIXWARE user!\n", player_info.name, player_info.xuid_low);
 #endif
                 }
                 else
@@ -187,6 +185,7 @@ void c_cheat_revealer::update_tab()
     //if (!g_cfg.misc.cheat_revealer)
         //return;
 
+    // паттерн оффсета player_resource:
     // memory::address_t player_resource = memory::get_pattern(client_dll, CXOR("8B 3D ? ? ? ? 85 FF 0F 84 D4 02 00 00"));
     const uintptr_t ptr_resource = **offsets::player_resource.add(0x2).cast< uintptr_t** >();
 
@@ -196,19 +195,21 @@ void c_cheat_revealer::update_tab()
             if (deref == NULL || deref == 0x01000100)
                 return;
 
-            //if (player->is_bot())
-            //  return;
+            if (player->is_bot())
+                return;
 
             auto index = player->index();
             auto esp = ESP->get_esp_player(index);
 
             if (ptr_resource)
             {
+                // так как контра уже не будет обновляться и хотелось поскорее протестить ревилер, я в тупую взял нужный мне оффсет для записи m_nPersonaDataPublicLevel
+                // заранее извиняюсь за тупое различие типов и использование DWORD"a
                 DWORD m_nPersonaDataPublicLevel = (DWORD)ptr_resource + 0x4dd4 + (index * 4);
 
                 if (HACKS->local->index() == index)
                 {
-                    // local player
+                    // локальный игрок, здесь можем установить какую ту свою иконку
                 }
                 else
                 {
@@ -232,8 +233,11 @@ void c_cheat_revealer::update_tab()
                     case CHEAT_NL:
                         *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2015;
                         break;
+                    case CHEAT_NIXWARE:
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2017;
+                        break;
                     default:
-                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2016; // иконка знака вопроса (т.к чит не найден)
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2016;
                         break;
                     }
                 }

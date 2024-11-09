@@ -362,6 +362,7 @@
     <ClCompile Include="buy_bot.cpp" />
     <ClCompile Include="bytesarray.cpp" />
     <ClCompile Include="chams.cpp" />
+    <ClCompile Include="cheat_revealer.cpp" />
     <ClCompile Include="checksum_crc32.cpp" />
     <ClCompile Include="clantag.cpp" />
     <ClCompile Include="cmd_shift.cpp" />
@@ -453,6 +454,7 @@
     <ClInclude Include="buy_bot.hpp" />
     <ClInclude Include="bytesarray.hpp" />
     <ClInclude Include="chams.hpp" />
+    <ClInclude Include="cheat_revealer.hpp" />
     <ClInclude Include="checksum_crc32.hpp" />
     <ClInclude Include="clantag.hpp" />
     <ClInclude Include="clip_ray_to_hitbox.hpp" />

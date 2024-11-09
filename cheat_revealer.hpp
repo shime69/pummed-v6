@@ -42,6 +42,8 @@ private:
    static bool is_using_evolve(uint16_t pct);
    static bool is_using_onetap(uint16_t pct);
    static bool is_using_pandora(uint16_t pct);
+   static bool is_using_nixware(uint16_t pct);
+   int last_receive_ack_time=0;
 public:
     static void handle_voice(c_svc_msg_voice_data* msg);
     static void update_tab();

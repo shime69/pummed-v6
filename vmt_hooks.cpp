@@ -1,5 +1,10 @@
 #include "globals.hpp"
 #include "features.hpp"
+#include "cheat_revealer.hpp"
+#include "exploits.hpp"
+#include "esp.hpp"
+#include "entlistener.hpp"
+#include "event_logs.hpp"
 
 namespace hooks::vmt
 {

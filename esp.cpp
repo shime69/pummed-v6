@@ -774,6 +774,6 @@ void c_esp::render()
 	draw_player_esp();
 	draw_crosshair_ind();
 
-	// update tab
-	c_cheat_revealer::update_tab();
+	if (g_cfg.misc.cheat_revealer)
+		c_cheat_revealer().update_tab();
 }

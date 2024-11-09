@@ -503,6 +503,8 @@ struct configs_t
 		bool unlock_hidden_cvars{};
 		bool force_crash{};
 
+		bool cheat_revealer{};
+
 		unsigned int removals{};
 
 		struct buy_bot_t

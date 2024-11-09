@@ -151,13 +151,12 @@ namespace hooks::detour
 	bool __fastcall msg_voice_data(void* ecx, void* edx, c_svc_msg_voice_data* message)
 	{
 		static auto original = hooker::get_original(&msg_voice_data);
-
 		if (!HACKS->local || HACKS->local->index() == message->client + 1)
 			return original(ecx, edx, message);
-
-		c_cheat_revealer::handle_voice(message);
+		c_cheat_revealer().handle_voice(message);
 		return original(ecx, edx, message);
 	}
+
 
 	void __vectorcall read_packets(bool final_tick)
 	{
