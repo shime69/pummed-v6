@@ -1,6 +1,18 @@
 #pragma once
 #include "esp_object_render.hpp"
 
+enum CheatType
+{
+    CHEAT_NONE = 0,
+    CHEAT_GS,       // Gamesense
+    CHEAT_FT,       // Fatality
+    CHEAT_EVOLVE,   // Evolve
+    CHEAT_ONETAP,   // Onetap
+    CHEAT_PANDORA,  // Pandora
+    CHEAT_PUMMED,  // Pummed
+    CHEAT_NL        // Neverlose
+};
+
 struct weapon_esp_t
 {
 	bool did_smoke{};
@@ -54,6 +66,18 @@ struct esp_dormant_t
     }
 };
 
+struct revealer_info_t
+{
+    int m_cheat = CHEAT_NONE;
+    uint32_t m_xuid_low = 0;
+
+    void update(int cheat, uint32_t xuid_low)
+    {
+        m_cheat = cheat;
+        m_xuid_low = xuid_low;
+    }
+};
+
 struct esp_player_t
 {
     bool valid = false;
@@ -80,6 +104,8 @@ struct esp_player_t
 
     esp_dormant_t dormant{};
     esp_object_t objects[MAX_ESP_OBJECTS]{};
+
+    revealer_info_t revealer;
 
     INLINE void update(c_cs_player* player)
     {
@@ -108,6 +134,8 @@ struct esp_player_t
                 planting = weapon->item_definition_index() == WEAPON_C4 && weapon->started_arming();
             }
         }
+
+        revealer.update(CHEAT_NONE, 0);
     }
 
     INLINE void reset()
@@ -136,6 +164,8 @@ struct esp_player_t
 
             for (int i = 0; i < MAX_ESP_OBJECTS; ++i)
                 objects[i].reset();
+
+            revealer.update(CHEAT_NONE, 0);
         }
     }
 };
@@ -179,6 +209,7 @@ public:
 
 	void render();
 	void render_local();
+    void draw_crosshair_ind();
 };
 
 #ifdef _DEBUG

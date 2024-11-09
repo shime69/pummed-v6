@@ -1,5 +1,10 @@
 #include "globals.hpp"
 #include "features.hpp"
+#include "cheat_revealer.hpp"
+#include "exploits.hpp"
+#include "esp.hpp"
+#include "entlistener.hpp"
+#include "event_logs.hpp"
 
 namespace hooks::vmt
 {
@@ -490,6 +495,48 @@ namespace hooks::vmt
 
 		return original(ecx, edx, setup);
 	}
+	#define NET_PUMMED_CODE 469521u
+
+	void send_data_msg(c_voice_communication_data* data)
+	{
+		c_clc_msg_voice_data msg;
+		std::memset(&msg, 0, sizeof(msg));
+
+		offsets::construct_voice_data_message.cast< uint32_t(__fastcall*)(void*, void*) >()(&msg, nullptr);
+		msg.set_data(data);
+		communication_string_t comm_str{};
+
+		msg.data = (uintptr_t)&comm_str;
+		msg.format = 0; // VoiceFormat_Steam
+		msg.flags = 63; // All flags
+		msg.xuid_low = NET_PUMMED_CODE; // All flags
+
+		auto net_chan = HACKS->engine->get_net_channel();
+		if (net_chan && !net_chan->is_loopback())
+		{
+			auto cs_net_chan = HACKS->client_state->net_channel;
+			if (cs_net_chan)
+				cs_net_chan->send_net_msg((uintptr_t)&msg, false, true);
+		}
+
+
+		// Print out the fields of msg
+		printf("msg.xuid_low: 0x%X\n", msg.xuid_low);
+		//printf("cs_net_chan: 0x%X\n", cs_net_chan);
+
+		offsets::destruct_voice_data_message.cast< uint32_t(__fastcall*)(void*) >()(&msg);
+	}
+
+
+
+
+
+	void send_shared_esp_data(const std::vector<uint8_t>& voice)
+	{
+		c_voice_communication_data new_data{};
+		std::memcpy(new_data.raw_data(), voice.data(), voice.size());
+		send_data_msg(&new_data);
+	}
 
 	bool __fastcall create_move(void* ecx, void* edx, float input_sample_time, c_user_cmd* cmd)
 	{
@@ -521,6 +568,14 @@ namespace hooks::vmt
 			HACKS->ping = netchannel->get_latency(FLOW_INCOMING) + HACKS->outgoing;
 			HACKS->arrival_tick = TIME_TO_TICKS(HACKS->outgoing) + HACKS->client_state->clock_drift_mgr.server_tick;
 		}
+
+		shared_esp_data_t data{};
+
+		std::vector<uint8_t> bytes{};
+		bytes.resize(sizeof(data));
+		std::memcpy(bytes.data(), &data, sizeof(data));
+		send_shared_esp_data(bytes);
+
 
 		if (cmd)
 			std::memcpy(&EXPLOITS->first_cmd, cmd, sizeof(c_user_cmd));

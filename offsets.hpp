@@ -55,6 +55,7 @@ namespace offsets
 
 	inline memory::address_t d3d_device;
 	inline memory::address_t studio_hdr;
+	inline memory::address_t player_resource;
 	inline memory::address_t world_to_screen_matrix;
 	inline memory::address_t return_addr_maintain_seq_transitions;
 	inline memory::address_t update_client_side_animation;

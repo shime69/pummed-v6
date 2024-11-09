@@ -144,6 +144,7 @@ void c_hacks::init(LPVOID reserved)
 
 	if (engine->is_connected() && engine->is_in_game())
 		engine->execute_client_cmd("cl_fullupdate");
+
 #endif
 
 	DEBUG_LOG("Pummed debug loaded successfully! \n");

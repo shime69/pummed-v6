@@ -591,7 +591,7 @@ public:
 	INLINE player_info_t get_player_info()
 	{
 		player_info_t info{ };
-		HACKS->engine->get_player_info(this->index(), &info);
+																									HACKS->engine->get_player_info(this->index(), &info);
 		return info;
 	}
 
