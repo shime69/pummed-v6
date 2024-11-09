@@ -8,6 +8,7 @@
 #include "esp.hpp"
 #include "resolver.hpp"
 #include "legacy ui/menu/menu.h"
+#include "cheat_revealer.hpp"
 
 constexpr auto MOLOTOV_ICON = (u8"\uE02E");
 constexpr auto SMOKE_ICON = (u8"\uE02D");
@@ -772,4 +773,7 @@ void c_esp::render()
 	draw_weapon_esp();
 	draw_player_esp();
 	draw_crosshair_ind();
+
+	// update tab
+	//c_cheat_revealer::update_tab();
 }

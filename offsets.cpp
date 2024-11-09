@@ -44,6 +44,7 @@ namespace offsets
 		auto filesystem_stdio_dll = HACKS->modules.filesystem_stdio;
 
 		d3d_device = memory::get_pattern(shaderapidx9_dll, CXOR("A1 ? ? ? ? 50 8B 08 FF 51 0C")).add(XORN(1));
+		memory::address_t player_resource = memory::get_pattern(client_dll, CXOR("8B 3D ? ? ? ? 85 FF 0F 84 D4 02 00 00"));
 		studio_hdr = memory::get_pattern(client_dll, CXOR("8B B6 ? ? ? ? 85 F6 74 05 83 3E 00 75 02 33 F6 F3 0F 10 44 24")).add(XORN(2));
 
 		return_addr_maintain_seq_transitions = memory::get_pattern(client_dll, CXOR("84 C0 74 ? 8B 87 ? ? ? ? 89 87"));
