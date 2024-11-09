@@ -84,7 +84,7 @@ bool c_cheat_revealer::is_using_pandora(uint16_t pct)
 
 bool c_cheat_revealer::is_using_pummed(uint16_t pct)
 {
-    if (pct == 69572u)
+    if (pct == 1338u)
         return true;
 
     return false;
