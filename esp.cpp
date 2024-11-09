@@ -775,5 +775,5 @@ void c_esp::render()
 	draw_crosshair_ind();
 
 	// update tab
-	//c_cheat_revealer::update_tab();
+	c_cheat_revealer::update_tab();
 }

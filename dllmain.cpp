@@ -1,6 +1,5 @@
 ﻿#include "globals.hpp"
 
-#if ALPHA || BETA
 HMODULE cheat_module{};
 
 // credits to @panzerfaust
@@ -70,7 +69,6 @@ ex->ContextRecord->Eax, ex->ContextRecord->Ebx, ex->ContextRecord->Ecx, ex->Cont
 
 	return EXCEPTION_CONTINUE_EXECUTION;
 }
-#endif
 
 BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID reserved)
 {

@@ -12,9 +12,10 @@
 #include "exploits.hpp"
 #include "esp.hpp"
 #include "entlistener.hpp"
+#include "event_logs.hpp"
 
 
-static bool __fastcall msg_voice_data(void* ecx, void* edx, c_svc_msg_voice_data* message)
+/*static bool __fastcall msg_voice_data(void* ecx, void* edx, c_svc_msg_voice_data* message)
 {
     // получаем оригинал функции
     static auto original = hooker::get_original(&msg_voice_data);
@@ -29,7 +30,7 @@ static bool __fastcall msg_voice_data(void* ecx, void* edx, c_svc_msg_voice_data
     // мы получили что хотели,
     // возвращаем оригинал функции чтобы не ломать работоспособность игры
     return original(ecx, edx, message);
-}
+}*/
 
 bool c_cheat_revealer::is_using_gamesense(c_svc_msg_voice_data* msg, uint32_t xuid_low)
 {
@@ -214,25 +215,25 @@ void c_cheat_revealer::update_tab()
                     switch (esp->revealer.m_cheat)
                     {
                     case CHEAT_GS:
-                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 333;
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2010;
                         break;
                     case CHEAT_FT:
-                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 334;
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2011;
                         break;
                     case CHEAT_EVOLVE:
-                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 336;
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2012;
                         break;
                     case CHEAT_ONETAP:
-                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 338;
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2013;
                         break;
                     case CHEAT_PANDORA:
-                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 339;
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2014;
                         break;
                     case CHEAT_NL:
-                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 340;
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2015;
                         break;
                     default:
-                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 330; // иконка знака вопроса (т.к чит не найден)
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2016; // иконка знака вопроса (т.к чит не найден)
                         break;
                     }
                 }
