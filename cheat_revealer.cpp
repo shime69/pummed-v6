@@ -152,7 +152,7 @@ void c_cheat_revealer::handle_voice(c_svc_msg_voice_data* msg)
                 const auto using_pandora = is_using_pandora(static_cast<uint16_t>(msg->xuid_low));
                 const auto using_pummed = is_using_pummed(static_cast<uint16_t>(msg->xuid_low));
                 const auto using_primordial = is_using_primordial(msg);
-                const auto using_nixware = is_using_pummed(static_cast<uint16_t>(msg->xuid_low));
+                const auto using_nixware = is_using_nixware(msg);
 
                 // switch case would be better?
                 if (using_skeet)
