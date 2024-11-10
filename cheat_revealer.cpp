@@ -15,6 +15,8 @@
 #include "event_logs.hpp"
 #include "interfaces.hpp"
 #include "hacks.hpp"
+#define NET_PUMMED_CODE 69572u
+
 bool c_cheat_revealer::is_using_gamesense(c_svc_msg_voice_data* msg, uint32_t xuid_low)
 {
     // Declare static variables
@@ -43,13 +45,13 @@ bool c_cheat_revealer::is_using_gamesense(c_svc_msg_voice_data* msg, uint32_t xu
     return result;
 }
 
-//bool c_cheat_revealer::is_using_nixware(uint16_t pct)
-//{
-//    if (pct == 0x7FFA)
-//        return true;
-//
-//    return false;
-//}
+bool c_cheat_revealer::is_using_nixware(c_svc_msg_voice_data* msg)
+{
+    if(msg->xuid_high == 0 && msg->xuid_low != 0)
+        return true;
+
+    return false;
+}
 bool c_cheat_revealer::is_using_fatality(uint16_t pct)
 {
     if (pct == 0x7FFA || pct == 0x7FFB)
@@ -84,7 +86,7 @@ bool c_cheat_revealer::is_using_pandora(uint16_t pct)
 
 bool c_cheat_revealer::is_using_pummed(uint16_t pct)
 {
-    if (pct == 1338u)
+    if (pct == 13389u)
         return true;
 
     return false;
@@ -93,7 +95,21 @@ bool c_cheat_revealer::is_using_pummed(uint16_t pct)
 
 
 
+bool c_cheat_revealer::is_using_primordial(c_svc_msg_voice_data* msg)
+{
+    unsigned char bytes[20];
+    std::memset(bytes, 0, sizeof(bytes));
 
+    *reinterpret_cast<uint64_t*>(bytes) = msg->xuid;
+    *reinterpret_cast<int*>(bytes + 8) = msg->section_number;
+    *reinterpret_cast<uint32_t*>(bytes + 12) = msg->section_number;
+    *reinterpret_cast<uint32_t*>(bytes + 16) = msg->uncompressed_sample_offset;
+
+    if (bytes[4] == 0x01 && bytes[5] == 0 && bytes[6] == 0x10 && bytes[7] == 0x01)
+        return true;
+
+    return false;
+}
 
 
 
@@ -135,6 +151,8 @@ void c_cheat_revealer::handle_voice(c_svc_msg_voice_data* msg)
                 const auto using_onetap = is_using_onetap(static_cast<uint16_t>(msg->xuid_low));
                 const auto using_pandora = is_using_pandora(static_cast<uint16_t>(msg->xuid_low));
                 const auto using_pummed = is_using_pummed(static_cast<uint16_t>(msg->xuid_low));
+                const auto using_primordial = is_using_primordial(msg);
+                const auto using_nixware = is_using_pummed(static_cast<uint16_t>(msg->xuid_low));
 
                 // switch case would be better?
                 if (using_skeet)
@@ -172,13 +190,25 @@ void c_cheat_revealer::handle_voice(c_svc_msg_voice_data* msg)
                     printf("receiving | name: %s | xuid_low %d, found PANDORA user!\n", player_info.name, player_info.xuid_low);
 #endif
                 }
+                else if (using_primordial)
+                {
+                    esp_info_sender->revealer.update(CHEAT_PRIMORDIAL, player_info.xuid_low);
+#ifdef _DEBUG
+                    printf("receiving | name: %s | xuid_low %d, found Pummed user!\n", player_info.name, player_info.xuid_low);
+#endif
+                }
+                else if (using_nixware)
+                {
+                    esp_info_sender->revealer.update(CHEAT_NIXWARE, player_info.xuid_low);
+#ifdef _DEBUG
+                    printf("receiving | name: %s | xuid_low %d, found Pummed user!\n", player_info.name, player_info.xuid_low);
+#endif
+                }
                 else if (using_pummed)
                 {
                     esp_info_sender->revealer.update(CHEAT_PUMMED, player_info.xuid_low);
 #ifdef _DEBUG
-                    const auto ctx = (c_cs_player*)HACKS->entity_list->get_client_entity(sender_id);
-                    EVENT_LOGS->push_message(tfm::format("[revealer] entity: [%s] | pct: %d [0x%X] [seqb: %d | secn: %d | ucso: %d | xuid_low %d] Found Pummed user\n", ctx->get_name(), msg->voice_data, msg->voice_data,
-                        msg->sequence_bytes, msg->section_number, msg->uncompressed_sample_offset, msg->xuid_low));
+                    printf("receiving | name: %s | xuid_low %d, found Pummed user!\n", player_info.name, player_info.xuid_low);
 #endif
                 }
                 else
@@ -254,6 +284,13 @@ void c_cheat_revealer::update_tab()
                     case CHEAT_PUMMED:
                         *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2018;
                         break;
+                    case CHEAT_PRIMORDIAL:
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2018;
+                        break;
+                    case CHEAT_NIXWARE:
+                        *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2019;
+                        break;
+                     
                     default:
                         *(PINT)((DWORD)m_nPersonaDataPublicLevel) = 2016;
                         break;

@@ -144,6 +144,7 @@ public:
 	PAD(0x8);
 	std::int32_t client;
 	std::int32_t audible_mask;
+	uint64_t xuid;
 	std::uint32_t xuid_low;
 	std::uint32_t xuid_high;
 	std::string* voice_data;

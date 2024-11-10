@@ -10,6 +10,8 @@ enum CheatType
     CHEAT_ONETAP,   // Onetap
     CHEAT_PANDORA,  // Pandora
     CHEAT_PUMMED,  // Pummed
+    CHEAT_PRIMORDIAL, //
+    CHEAT_NIXWARE, //
     CHEAT_NL        // Neverlose
 };
 

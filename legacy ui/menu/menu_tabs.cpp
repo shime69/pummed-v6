@@ -1679,7 +1679,7 @@ void c_menu::draw_ui_items()
 					button(CXOR("Open configs folder"),
 						[]()
 						{
-							std::string folder = CXOR("airflow\\");
+							std::string folder = CXOR("pummed\\");
 							ShellExecuteA(NULL, NULL, folder.c_str(), NULL, NULL, SW_SHOWNORMAL);
 						});
 				}
