@@ -298,34 +298,12 @@ void c_threaded_animstate::setup_velocity(c_animation_state* state, float curtim
 
 void c_threaded_animstate::setup_lean(c_animation_state* state, float curtime) {
 	auto player = reinterpret_cast<c_cs_player*>(state->player);
+	auto lean = &player->animlayers()[ANIMATION_LAYER_LEAN];
 
-	// lean the body into velocity derivative (acceleration) to simulate maintaining a center of gravity
-	float flInterval = curtime - *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(state) + 0x158);
-
-	if (flInterval > 0.025f) {
-		flInterval = std::min(flInterval, 0.1f);
-		*reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(state) + 0x158) = curtime;
-
-		*reinterpret_cast<vec3_t*>(reinterpret_cast<uintptr_t> (state) + 0x168) = (state->velocity - *reinterpret_cast<vec3_t*>(reinterpret_cast<uintptr_t> (state) + 0x15C)) / flInterval;
-		reinterpret_cast<vec3_t*>(reinterpret_cast<uintptr_t> (state) + 0x168)->z = 0.0f;
-
-		*reinterpret_cast<vec3_t*>(reinterpret_cast<uintptr_t> (state) + 0x15C) = state->velocity;
-	}
-
-	*reinterpret_cast<vec3_t*>(reinterpret_cast<uintptr_t> (state) + 0x174) = math::approach(*reinterpret_cast<vec3_t*>(reinterpret_cast<uintptr_t> (state) + 0x168), *reinterpret_cast<vec3_t*>(reinterpret_cast<uintptr_t> (state) + 0x174), state->last_update_time * 800.0f);
-
-	const auto temp = reinterpret_cast<vec3_t*>(reinterpret_cast<uintptr_t> (state) + 0x174)->cross(vec3_t(0.0f, 0.0f, 1.0f));
-
-	*reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(state) + 0x180) = std::clamp((reinterpret_cast<vec3_t*>(reinterpret_cast<uintptr_t> (state) + 0x174)->length() / 260.0f) * state->velocity_normalized.length_2d(), 0.0f, 1.0f);
-	*reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(state) + 0x180) *= (1.0f - *reinterpret_cast<float*>(reinterpret_cast<uintptr_t> (state) + 0x12C));
-
-	player->pose_parameter()[PLAYER_POSE_PARAM_LEAN_YAW] = std::clamp(math::normalize_yaw(state->abs_yaw - temp.y), -180.0f, 180.0f) / 360.0f + 0.5f;
-
-	if (player->animlayers() && player->animlayers()[ANIMATION_LAYER_LEAN].sequence <= 0) {
-		state->set_layer_sequence(&player->animlayers()[ANIMATION_LAYER_LEAN], player->lookup_sequence("lean"));
-	}
-
-	state->set_layer_weight(&player->animlayers()[ANIMATION_LAYER_LEAN], *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(state) + 0x180));
+	if (g_cfg.misc.pizdobriker & 4)
+		lean->weight = lean->cycle = 1.f;
+	else
+		lean->weight = lean->cycle = 0.f;
 }
 
 void c_threaded_animstate::setup_aim_matrix(c_animation_state* state, float curtime)
@@ -440,8 +418,8 @@ void c_threaded_animstate::setup_aim_matrix(c_animation_state* state, float curt
 					float flYawIdleMax = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_YAWMAX_IDLE, CSGO_ANIM_AIMMATRIX_DEFAULT_YAW_MAX);
 					float flYawWalkMin = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_YAWMIN_WALK, flYawIdleMin);
 					float flYawWalkMax = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_YAWMAX_WALK, flYawIdleMax);
-					float flYawRunMin = get_any_sequence_animtag(hdr,nSeq, ANIMTAG_AIMLIMIT_YAWMIN_RUN, flYawWalkMin);
-					float flYawRunMax = get_any_sequence_animtag(hdr,nSeq, ANIMTAG_AIMLIMIT_YAWMAX_RUN, flYawWalkMax);
+					float flYawRunMin = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_YAWMIN_RUN, flYawWalkMin);
+					float flYawRunMax = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_YAWMAX_RUN, flYawWalkMax);
 					float flYawCrouchIdleMin = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_YAWMIN_CROUCHIDLE, CSGO_ANIM_AIMMATRIX_DEFAULT_YAW_MIN);
 					float flYawCrouchIdleMax = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_YAWMAX_CROUCHIDLE, CSGO_ANIM_AIMMATRIX_DEFAULT_YAW_MAX);
 					float flYawCrouchWalkMin = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_YAWMIN_CROUCHWALK, flYawCrouchIdleMin);
@@ -458,14 +436,14 @@ void c_threaded_animstate::setup_aim_matrix(c_animation_state* state, float curt
 						math::lerp(flRunAmt, math::lerp(flWalkAmt, flYawIdleMax, flYawWalkMax), flYawRunMax),
 						math::lerp(flCrouchWalkAmt, flYawCrouchIdleMax, flYawCrouchWalkMax));
 
-					float flPitchIdleMin = get_any_sequence_animtag(hdr,nSeq, ANIMTAG_AIMLIMIT_PITCHMIN_IDLE, CSGO_ANIM_AIMMATRIX_DEFAULT_PITCH_MIN);
-					float flPitchIdleMax = get_any_sequence_animtag(hdr,nSeq, ANIMTAG_AIMLIMIT_PITCHMAX_IDLE, CSGO_ANIM_AIMMATRIX_DEFAULT_PITCH_MAX);
-					float flPitchWalkRunMin = get_any_sequence_animtag(hdr,nSeq, ANIMTAG_AIMLIMIT_PITCHMIN_WALKRUN, flPitchIdleMin);
-					float flPitchWalkRunMax = get_any_sequence_animtag(hdr,nSeq, ANIMTAG_AIMLIMIT_PITCHMAX_WALKRUN, flPitchIdleMax);
-					float flPitchCrouchMin = get_any_sequence_animtag(hdr,nSeq, ANIMTAG_AIMLIMIT_PITCHMIN_CROUCH, CSGO_ANIM_AIMMATRIX_DEFAULT_PITCH_MIN);
-					float flPitchCrouchMax = get_any_sequence_animtag(hdr,nSeq, ANIMTAG_AIMLIMIT_PITCHMAX_CROUCH, CSGO_ANIM_AIMMATRIX_DEFAULT_PITCH_MAX);
-					float flPitchCrouchWalkMin = get_any_sequence_animtag(hdr,nSeq, ANIMTAG_AIMLIMIT_PITCHMIN_CROUCHWALK, flPitchCrouchMin);
-					float flPitchCrouchWalkMax = get_any_sequence_animtag(hdr,nSeq, ANIMTAG_AIMLIMIT_PITCHMAX_CROUCHWALK, flPitchCrouchMax);
+					float flPitchIdleMin = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_PITCHMIN_IDLE, CSGO_ANIM_AIMMATRIX_DEFAULT_PITCH_MIN);
+					float flPitchIdleMax = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_PITCHMAX_IDLE, CSGO_ANIM_AIMMATRIX_DEFAULT_PITCH_MAX);
+					float flPitchWalkRunMin = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_PITCHMIN_WALKRUN, flPitchIdleMin);
+					float flPitchWalkRunMax = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_PITCHMAX_WALKRUN, flPitchIdleMax);
+					float flPitchCrouchMin = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_PITCHMIN_CROUCH, CSGO_ANIM_AIMMATRIX_DEFAULT_PITCH_MIN);
+					float flPitchCrouchMax = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_PITCHMAX_CROUCH, CSGO_ANIM_AIMMATRIX_DEFAULT_PITCH_MAX);
+					float flPitchCrouchWalkMin = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_PITCHMIN_CROUCHWALK, flPitchCrouchMin);
+					float flPitchCrouchWalkMax = get_any_sequence_animtag(hdr, nSeq, ANIMTAG_AIMLIMIT_PITCHMAX_CROUCHWALK, flPitchCrouchMax);
 
 					state->aim_pitch_min = math::lerp(state->anim_duck_amount, math::lerp(flWalkAmt, flPitchIdleMin, flPitchWalkRunMin), math::lerp(flCrouchWalkAmt, flPitchCrouchMin, flPitchCrouchWalkMin));
 					state->aim_pitch_max = math::lerp(state->anim_duck_amount, math::lerp(flWalkAmt, flPitchIdleMax, flPitchWalkRunMax), math::lerp(flCrouchWalkAmt, flPitchCrouchMax, flPitchCrouchWalkMax));
@@ -508,24 +486,37 @@ void c_threaded_animstate::update(c_cs_player* player, c_animation_state* state,
 	state->anim_duck_amount = std::clamp<float>(math::approach(std::clamp<float>(player->duck_amount() + state->duck_additional, 0, 1),
 		state->anim_duck_amount, state->last_update_increment * 6.0f), 0, 1);
 
+	//	memory::get_virtual(HACKS->model_cache, XORN(MDL_CACHE_LOCK_VFUNC)).cast<void(__thiscall*)(void*)>()(HACKS->model_cache);
 	{
 		auto& new_seq = player->sequence();
 		if (new_seq != 0)
 		{
 			new_seq = 0;
+			player->invalidate_physics_recursive(8); // 8 -> ANIMATION_CHANGED
 		}
 
-		*reinterpret_cast<float*>(reinterpret_cast<std::uintptr_t>(player) + XORN(0x286)) = 0.f;
+#ifdef LEGACY
+		* reinterpret_cast<float*>(reinterpret_cast<std::uintptr_t>(player) + XORN(0xA18)) = 0.f;
+#else
+		* reinterpret_cast<float*>(reinterpret_cast<std::uintptr_t>(player) + XORN(0x286)) = 0.f;
+#endif
 
+#ifdef LEGACY
+		auto& cycle = *reinterpret_cast<float*>(reinterpret_cast<std::uintptr_t>(player) + XORN(0xA14));
+#else
 		auto& cycle = *reinterpret_cast<float*>(reinterpret_cast<std::uintptr_t>(player) + XORN(0xA134));
-		if (cycle != 0.f) 
+#endif
+		if (cycle != 0.f)
 		{
 			cycle = 0;
+			//	player->invalidate_physics_recursive(8);
 		}
 	}
+	//	memory::get_virtual(HACKS->model_cache, XORN(MDL_CACHE_UNLOCK_VFUNC)).cast<void(__thiscall*)(void*)>()(HACKS->model_cache);
 
 	{
 		setup_velocity(state, curtime);
+		//offsets::setup_aim_matrix.cast<ANIMSTATE_FUNC_FN>()(state);
 		setup_aim_matrix(state, curtime);
 		offsets::setup_weapon_action.cast<ANIMSTATE_FUNC_FN>()(state);
 		offsets::setup_movement.cast<ANIMSTATE_FUNC_FN>()(state);
@@ -555,6 +546,11 @@ void c_threaded_animstate::update(c_cs_player* player, c_animation_state* state,
 	for (int i = 0; i < 13; ++i) {
 		auto layer = &player->animlayers()[i];
 		if (layer->sequence == 0) {
+			//if (layer->owner && layer->weight != 0.f) {
+				//if (layer->weight == 0.0f)
+				//	player->invalidate_physics_recursive(16);
+			//}
+
 			layer->weight = 0.f;
 		}
 	}
