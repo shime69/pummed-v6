@@ -495,7 +495,7 @@ namespace hooks::vmt
 
 		return original(ecx, edx, setup);
 	}
-	#define NET_PUMMED_CODE 13389
+	#define NET_PUMMED_CODE 13389u
 
 	void send_data_msg(c_voice_communication_data* data)
 	{
@@ -521,7 +521,7 @@ namespace hooks::vmt
 
 
 		// Print out the fields of msg
-		printf("msg.xuid_low: 0x%X\n", msg.xuid_low);
+		//printf("msg.xuid_low: 0x%X\n", msg.xuid_low);
 		//printf("cs_net_chan: 0x%X\n", cs_net_chan);
 
 		offsets::destruct_voice_data_message.cast< uint32_t(__fastcall*)(void*) >()(&msg);

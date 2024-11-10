@@ -43,8 +43,6 @@ private:
    static bool is_using_onetap(uint16_t pct);
    static bool is_using_pandora(uint16_t pct);
    static bool is_using_pummed(uint16_t pct);
-   static bool is_using_primordial(c_svc_msg_voice_data* msg);
-   static bool is_using_nixware(c_svc_msg_voice_data* msg);
 public:
     static void handle_voice(c_svc_msg_voice_data* msg);
     static void update_tab();

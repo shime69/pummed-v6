@@ -10,8 +10,6 @@ enum CheatType
     CHEAT_ONETAP,   // Onetap
     CHEAT_PANDORA,  // Pandora
     CHEAT_PUMMED,  // Pummed
-    CHEAT_PRIMORDIAL, //
-    CHEAT_NIXWARE, //
     CHEAT_NL        // Neverlose
 };
 
@@ -72,11 +70,13 @@ struct revealer_info_t
 {
     int m_cheat = CHEAT_NONE;
     uint32_t m_xuid_low = 0;
+    float m_last_update = 0.f;
 
     void update(int cheat, uint32_t xuid_low)
     {
         m_cheat = cheat;
         m_xuid_low = xuid_low;
+        m_last_update = HACKS->global_vars->realtime;
     }
 };
 
