@@ -24,7 +24,7 @@
     }
 }*/
 
-void c_event_logs::DetectUnregisteredShots(c_game_event* event) {
+/*void c_event_logs::DetectUnregisteredShots(c_game_event* event) {
 	if (!HACKS->local || !HACKS->local->is_alive())
 		return;
 
@@ -56,7 +56,7 @@ void c_event_logs::DetectUnregisteredShots(c_game_event* event) {
 #if _DEBUG
 	printf("Detected unregistered shot, and fixed it!");
 #endif;
-}
+}*/
 
 
 void c_event_logs::on_item_purchase(c_game_event* event)
@@ -149,7 +149,7 @@ void c_event_logs::on_game_events(c_game_event* event)
 	on_player_hurt(event);
 	on_bomb_plant(event);
 	on_item_purchase(event);
-	DetectUnregisteredShots(event);
+	//DetectUnregisteredShots(event);
 }
 
 void c_event_logs::filter_console()
