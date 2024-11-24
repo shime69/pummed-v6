@@ -9,6 +9,7 @@
 #include "resolver.hpp"
 #include "legacy ui/menu/menu.h"
 #include "cheat_revealer.hpp"
+#include "exploits.hpp"
 
 constexpr auto MOLOTOV_ICON = (u8"\uE02E");
 constexpr auto SMOKE_ICON = (u8"\uE02D");
@@ -736,11 +737,13 @@ void c_esp::draw_crosshair_ind()
 {
 	if (!g_cfg.misc.scopeind)
 		return;
-	RENDER->text(RENDER->screen.x / 2 - 10, RENDER->screen.y / 2 + 8, c_color(g_cfg.misc.ui_color[0], g_cfg.misc.ui_color[1], g_cfg.misc.ui_color[2],255) , FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.bold, "Pum");
+	RENDER->text(RENDER->screen.x / 2 - 10, RENDER->screen.y / 2 + 8, c_color(100, 101, 143,255) , FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.bold, "Pum");
 	RENDER->text(RENDER->screen.x / 2 + 10, RENDER->screen.y / 2 + 8, { 255, 255, 255, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.bold, "med");
 	if(!g_cfg.binds[dt_b].toggled)
 		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 15, { 69, 66, 66, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "dt");
-	else if(g_cfg.binds[dt_b].toggled)
+	else if(EXPLOITS->recharge.finish)
+		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 15, { 0,255,0, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "dt");
+	else if(!EXPLOITS->recharge.finish)
 		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 15, { 242, 73, 73, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "dt");
 	if (!g_cfg.binds[hs_b].toggled)
 		RENDER->text(RENDER->screen.x / 2, RENDER->screen.y / 2 + 22, { 69, 66, 66, 255 }, FONT_CENTERED_X | FONT_DROPSHADOW | FONT_LIGHT_BACK, &RENDER->fonts.pixel, "os-aa");

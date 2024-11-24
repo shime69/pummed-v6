@@ -108,9 +108,12 @@ void c_menu::draw_binds()
 	imgui_blur::create_blur(list, window_pos, window_pos + window_size, ImColor(80,80,80, (int)(130 * alpha)), 4.f, ImDrawCornerFlags_Bot);
 
 	ImVec2 line_start = ImVec2(window_pos.x, window_pos.y);
-	ImVec2 line_end = ImVec2(window_pos.x, window_pos.y) + ImVec2(window_size.x, 0);
-	list->AddLine(line_start, line_end, c_color(g_cfg.misc.ui_color.base().r(), g_cfg.misc.ui_color.base().g(), g_cfg.misc.ui_color.base().b(), g_cfg.misc.ui_color.base().a() * alpha).as_imcolor(), 3.0f);
-
+	ImVec2 line_end = ImVec2(window_pos.x, window_pos.y) + ImVec2(window_size.x, 3);
+	//list->AddLine(line_start, line_end, c_color(g_cfg.misc.ui_color.base().r(), g_cfg.misc.ui_color.base().g(), g_cfg.misc.ui_color.base().b(), g_cfg.misc.ui_color.base().a() * alpha).as_imcolor(), 3.0f);
+	list->AddLineMultiColor(line_start, line_end,
+		c_color(255, 0, 0, 255).as_imcolor(),  // Red with full opacity
+		c_color(0, 255, 0, 255).as_imcolor(),  // Green with full opacity
+		3.0f);
 	ImGui::SetCursorPos(ImVec2((window_size.x - ImGui::CalcTextSize("Hotkeys").x) / 2, 4));
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 1.f, alpha));
 	ImGui::Text("Hotkeys");
