@@ -1,6 +1,8 @@
 #include "globals.hpp"
 #include "event_logs.hpp"
 #include "imgui/imgui.h"
+#include "engine_prediction.hpp"
+#include "structs.hpp"
 
 /*std::pair<std::string, color> get_message_prefix_type(int type)
 {
@@ -21,6 +23,41 @@
         return {};
     }
 }*/
+
+/*void c_event_logs::DetectUnregisteredShots(c_game_event* event) {
+	if (!HACKS->local || !HACKS->local->is_alive())
+		return;
+
+	auto* pred_vars = ENGINE_PREDICTION->get_networked_vars(HACKS->client_state->last_command_ack);
+	if (!pred_vars)
+		return;
+
+	if (pred_vars->command_number != HACKS->client_state->last_command_ack)
+		return;
+
+	auto weapon = reinterpret_cast<c_base_combat_weapon*>(HACKS->entity_list->get_client_entity_handle(HACKS->local->active_weapon()));
+
+	if (!weapon)
+		return;
+
+	float fLastShotTime = weapon->last_shot_time();
+
+	if (std::abs(HACKS->predicted_time - fLastShotTime) > 0.2f)
+		return;
+
+	auto weapon_info = HACKS->weapon_info;
+
+	if (!weapon_info)
+		return;
+
+	float cycle_time = weapon_info->cycletime;
+	HACKS->weapon->next_primary_attack() = fLastShotTime + cycle_time;
+	
+#if _DEBUG
+	printf("Detected unregistered shot, and fixed it!");
+#endif;
+}*/
+
 
 void c_event_logs::on_item_purchase(c_game_event* event)
 {
@@ -112,6 +149,7 @@ void c_event_logs::on_game_events(c_game_event* event)
 	on_player_hurt(event);
 	on_bomb_plant(event);
 	on_item_purchase(event);
+	//DetectUnregisteredShots(event);
 }
 
 void c_event_logs::filter_console()

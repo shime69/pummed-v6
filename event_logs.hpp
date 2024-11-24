@@ -34,6 +34,8 @@ private:
 	std::pair< std::string, color > get_message_prefix_type(int type);
 	std::vector<event_log_t> event_logs{};
 
+	//void DetectUnregisteredShots(c_game_event* event);
+
 	//void on_player_death(c_game_event* event);
 	void on_item_purchase(c_game_event* event);
 	void on_bomb_plant(c_game_event* event);

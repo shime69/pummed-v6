@@ -693,7 +693,13 @@ public:
 
 	NETVAR(next_secondary_attack, float, "DT_BaseCombatWeapon", "m_flNextSecondaryAttack");
 	NETVAR(burst_shots_remaining, int, "DT_WeaponCSBaseGun", "m_iBurstShotsRemaining");
-	NETVAR(next_primary_attack, float, "DT_BaseCombatWeapon", "m_flNextPrimaryAttack");
+	__forceinline float& next_primary_attack() {
+		static std::uintptr_t offset = netvars::get_offset(
+			[]() { constexpr hash32_t out{ c_fnv1a::get("DT_BaseCombatWeapon") }; return out; }(),
+			[]() { constexpr hash32_t out{ c_fnv1a::get("m_flNextPrimaryAttack") }; return out; }()
+		);
+		return *(std::remove_reference_t<float>*)((std::uintptr_t)this + offset);
+	}
 	NETVAR(next_burst_shot, float,"CWeaponCSBaseGun", "m_fNextBurstShot");
 	NETVAR(last_shot_time, float, "DT_WeaponCSBase", "m_fLastShotTime");
 	NETVAR(throw_time, float, "DT_BaseCSGrenade", "m_fThrowTime");

@@ -2,6 +2,11 @@
 #include "ik_solver.hpp"
 #include "server_bones.hpp"
 #include "animations.hpp"
+#include "main_utils.hpp"
+#include "movement.hpp"
+
+// pasted from legendware that was pasted from eexomi
+// works P since 2021
 
 namespace bone_merge
 {
@@ -28,8 +33,10 @@ void clamp_bones_info_t::store(c_cs_player* player) {
 	if (!collideable)
 		return;
 
+#ifndef LEGACY
 	collision_change_time = player->collision_change_time();
 	collision_change_origin = player->collision_change_origin();
+#endif
 
 	auto& base_origin = player == HACKS->local ? player->get_abs_origin() : player->origin();
 	origin = base_origin;
@@ -133,12 +140,12 @@ void c_bone_builder::clamp_bones_in_bbox(c_cs_player* player, matrix3x4_t* matri
 	if (studiohdr->bones <= 0 || bone_chains <= 0)
 		return;
 
-	if (bone_chains > 0) 
+	if (bone_chains > 0)
 	{
 		auto ik_chain_ptr = deref_hdr + *(int*)(deref_hdr + 0x120);
 
 		auto left_chain = 0, right_chain = 0;
-		for (int i = 0; i < bone_chains; ++i) 
+		for (int i = 0; i < bone_chains; ++i)
 		{
 			auto current_chain_index = *(int*)(*(int*)(ik_chain_ptr + 12) + ik_chain_ptr + 56);
 
@@ -285,6 +292,10 @@ void merge_matching_poses(std::uintptr_t& bone_merge, float* poses, float* targe
 	}
 }
 
+
+
+
+
 void c_bone_builder::store(c_cs_player* player, matrix3x4_t* matrix, int mask, c_studio_hdr* hdr, int* flags_base, int parent_count)
 {
 	auto state = player->animstate();
@@ -298,8 +309,14 @@ void c_bone_builder::store(c_cs_player* player, matrix3x4_t* matrix, int mask, c
 	this->matrix = matrix;
 	this->mask = mask;
 
-	time = player == HACKS->local ? HACKS->predicted_time : player->sim_time();
+	static int tick = 0;
 
+
+#ifdef LEGACY
+	time = player->sim_time();
+#else
+	time = player == HACKS->local ? HACKS->predicted_time : player->sim_time();
+#endif
 	attachments = false;
 	ik_ctx = false;
 	dispatch = true;
@@ -307,6 +324,65 @@ void c_bone_builder::store(c_cs_player* player, matrix3x4_t* matrix, int mask, c
 	bone_parent_count = parent_count;
 
 	player->store_poses(poses.data());
+
+	if (player == HACKS->local)
+	{
+
+		if (g_cfg.misc.pizdobriker1)
+		{
+
+			if (g_cfg.misc.air_legs == 2)// static legs in air
+				poses.data()[6] = 1;
+
+			if (g_cfg.misc.ground_legs == 2 && !(HACKS->local->flags().has(FL_FLY)) + (g_cfg.misc.slide_walk = true)) //jitter legs
+
+				switch (tick %= 2)
+				{
+				case 0:
+					HACKS->global_vars->tickcount = poses.data()[0] = 0;
+					break;
+				case 1:
+					HACKS->global_vars->tickcount = poses.data()[0] = 0.5;
+					break;
+				}
+
+
+
+			if (g_cfg.misc.ground_legs == 1 && !(HACKS->local->flags().has(FL_FLY)) + (g_cfg.misc.slide_walk = false)) //allah legs
+				poses.data()[7] = 1;
+
+			static float last_land_time = 0.f;
+
+
+			auto layers = HACKS->local->animlayers();
+
+			if (g_cfg.misc.air_legs == 1 && !(HACKS->local->flags().has(FL_ONGROUND))) //move legs in air
+				layers[ANIMATION_LAYER_MOVEMENT_MOVE].weight = 15.f;
+
+			if (g_cfg.misc.pizdobriker & 1) //eblan breaker
+			{
+				layers[PLAYER_POSE_PARAM_BODY_PITCH].weight = 10.f;
+				layers[PLAYER_POSE_PARAM_BODY_YAW].weight = 10.f;
+			}
+
+			if (g_cfg.misc.ground_legs == 3 && !(HACKS->local->flags().has(FL_FLY)) + (g_cfg.misc.slide_walk = true)) //backward legs
+				poses.data()[0] = 1;
+
+
+			if (!MOVEMENT->on_ground())
+			{
+				last_land_time = HACKS->global_vars->curtime;
+			}
+			else if (g_cfg.misc.pizdobriker & 2 && (std::fabsf(HACKS->global_vars->curtime - last_land_time) < 1.f)) //pitch 0 on land
+				poses.data()[12] = 0.5;
+
+			//if (g_cfg.misc.pizdobriker & 3)
+			//	layers[ANIMATION_LAYER_LEAN].weight = 0.f;
+
+		}
+
+
+	}
 
 	eye_angles = player->eye_angles();
 
@@ -322,23 +398,28 @@ void c_bone_builder::store(c_cs_player* player, matrix3x4_t* matrix, int mask, c
 		math::memcpy_sse(poses_world.data(), player->pose_parameter(), sizeof(float) * 24);
 
 	filled = true;
+
+	++tick;
+	tick %= 2;
 }
 
 void c_bone_builder::setup()
 {
-	alignas(16) vec3_t position[128] = {};
-	alignas(16) quaternion_t q[128] = {};
+	alignas(16) vec3_t position[128] = { };
+	alignas(16) quaternion_t q[128] = { };
 
 	auto ik_context = (c_ik_context*)animating->ik_ctx();
+
 	if (!ik_ctx)
 		ik_context = nullptr;
 
 	hdr = animating->get_studio_hdr();
+
 	if (!hdr)
 		return;
 
-	uint32_t bone_computed[8] = {};
-	std::memset(bone_computed, 0, sizeof(bone_computed));
+	uint32_t bone_computed[8]{};
+	std::memset(bone_computed, 0, 8 * sizeof(uint32_t));
 
 	bool sequences_available = !*(int*)(*(uintptr_t*)hdr + 0x150) || *(int*)((uintptr_t)hdr + 0x4);
 
@@ -355,11 +436,9 @@ void c_bone_builder::setup()
 		ik_context->solve_dependencies(position, q, matrix, (uint8_t*)bone_computed);
 	}
 	else if (sequences_available)
-	{
 		get_skeleton(position, q);
-	}
 
-	matrix3x4_t transform;
+	matrix3x4_t transform{};
 	transform.angle_matrix(angles, origin);
 
 	studio_build_matrices(hdr, transform, position, q, mask, matrix, bone_computed);
@@ -368,6 +447,7 @@ void c_bone_builder::setup()
 		animating->attachments_helper();
 
 	animating->last_bone_setup_time() = time;
+
 	animating->bone_accessor()->readable_bones |= mask;
 	animating->bone_accessor()->writable_bones |= mask;
 
@@ -388,21 +468,27 @@ void c_bone_builder::setup()
 	if (!hitbox_set)
 		return;
 
-	for (int i = 0; i < hitbox_set->num_hitboxes; ++i)
+	for (int i{}; i < hitbox_set->num_hitboxes; ++i)
 	{
 		const auto hitbox = hitbox_set->hitbox(i);
-		if (!hitbox || hitbox->radius >= 0.f)
+		if (!hitbox
+			|| hitbox->radius >= 0.f)
 			continue;
 
-		matrix3x4_t rot_matrix;
-		rot_matrix.angle_matrix(hitbox->rotation);
-		rot_matrix.contact_transforms(matrix[hitbox->bone]);
+		matrix3x4_t rot_mat{};
+		rot_mat.angle_matrix(hitbox->rotation);
+		rot_mat.contact_transforms(matrix[hitbox->bone]);
 	}
 
-	clamp_bones_info_t info;
-	info.store(animating);
+#ifndef LEGACY
+	if (animating == HACKS->local)
+	{
+		clamp_bones_info_t info{};
+		info.store(animating);
 
-	clamp_bones_in_bbox(animating, matrix, mask, time, animating->eye_angles(), info);
+		clamp_bones_in_bbox(animating, matrix, mask, time, animating->eye_angles(), info);
+	}
+#endif
 }
 
 INLINE bool can_be_animated(c_cs_player* player)
@@ -462,62 +548,62 @@ void c_bone_builder::get_skeleton(vec3_t* position, quaternion_t* q)
 		world_weapon = (c_cs_player*)HACKS->entity_list->get_client_entity_handle(weapon->weapon_world_model());
 
 	auto wrong_weapon = [&]()
-	{
-		if (can_be_animated(animating) && world_weapon)
 		{
-			uintptr_t bone_merge = bone_merge::get_bone_merge(world_weapon);
-			if (bone_merge)
+			if (can_be_animated(animating) && world_weapon)
 			{
-				merge_matching_poses(bone_merge, poses_world.data(), poses.data());
-
-				auto world_hdr = world_weapon->get_studio_hdr();
-
-				world_ik->constructor();
-				world_ik->init(world_hdr, &angles, &origin, time, 0, BONE_USED_BY_BONE_MERGE);
-
-				alignas(16) char buffer2[32]{};
-				alignas(16) bone_setup_t* world_setup = (bone_setup_t*)&buffer2;
-
-				world_setup->hdr = world_hdr;
-				world_setup->mask = BONE_USED_BY_BONE_MERGE;
-				world_setup->pose_parameter = poses_world.data();
-				world_setup->pose_debugger = nullptr;
-
-				world_setup->init_pose(new_position, new_q, world_hdr);
-
-				for (int i = 0; i < layer_count; ++i)
+				uintptr_t bone_merge = bone_merge::get_bone_merge(world_weapon);
+				if (bone_merge)
 				{
-					c_animation_layers* layer = &layers[i];
+					merge_matching_poses(bone_merge, poses_world.data(), poses.data());
 
-					if (layer && layer->sequence > 1 && layer->weight > 0.f)
+					auto world_hdr = world_weapon->get_studio_hdr();
+
+					world_ik->constructor();
+					world_ik->init(world_hdr, &angles, &origin, time, 0, BONE_USED_BY_BONE_MERGE);
+
+					alignas(16) char buffer2[32]{};
+					alignas(16) bone_setup_t* world_setup = (bone_setup_t*)&buffer2;
+
+					world_setup->hdr = world_hdr;
+					world_setup->mask = BONE_USED_BY_BONE_MERGE;
+					world_setup->pose_parameter = poses_world.data();
+					world_setup->pose_debugger = nullptr;
+
+					world_setup->init_pose(new_position, new_q, world_hdr);
+
+					for (int i = 0; i < layer_count; ++i)
 					{
-						if (dispatch && animating == HACKS->local)
-							animating->update_dispatch_layer(layer, world_hdr, layer->sequence);
+						c_animation_layers* layer = &layers[i];
 
-						if (!dispatch || layer->second_dispatch_sequence <= 0 || layer->second_dispatch_sequence >= (*(studiohdr_t**)world_hdr)->local_seq)
-							bone_setup->accumulate_pose(position, q, layer->sequence, layer->cycle, layer->weight, time, ik_context);
-						else if (dispatch)
+						if (layer && layer->sequence > 1 && layer->weight > 0.f)
 						{
-							static auto copy_from_follow = offsets::copy_from_follow.cast<void(__thiscall*)(std::uintptr_t, vec3_t*, quaternion_t*, int, vec3_t*, quaternion_t*)>();
-							static auto add_dependencies = offsets::add_dependencies.cast<void(__thiscall*)(c_ik_context*, float, int, int, const float[], float)>();
-							static auto copy_to_follow = offsets::copy_to_follow.cast<void(__thiscall*)(std::uintptr_t, vec3_t*, quaternion_t*, int, vec3_t*, quaternion_t*)>();
+							if (dispatch && animating == HACKS->local)
+								animating->update_dispatch_layer(layer, world_hdr, layer->sequence);
 
-							copy_from_follow(bone_merge, position, q, BONE_USED_BY_BONE_MERGE, new_position, new_q);
-							if (ik_context)
-								add_dependencies(ik_context, *(float*)((std::uintptr_t)animating + 0xA14), layer->sequence, layer->cycle, poses.data(), layer->weight);
+							if (!dispatch || layer->second_dispatch_sequence <= 0 || layer->second_dispatch_sequence >= (*(studiohdr_t**)world_hdr)->local_seq)
+								bone_setup->accumulate_pose(position, q, layer->sequence, layer->cycle, layer->weight, time, ik_context);
+							else if (dispatch)
+							{
+								static auto copy_from_follow = offsets::copy_from_follow.cast<void(__thiscall*)(std::uintptr_t, vec3_t*, quaternion_t*, int, vec3_t*, quaternion_t*)>();
+								static auto add_dependencies = offsets::add_dependencies.cast<void(__thiscall*)(c_ik_context*, float, int, int, const float[], float)>();
+								static auto copy_to_follow = offsets::copy_to_follow.cast<void(__thiscall*)(std::uintptr_t, vec3_t*, quaternion_t*, int, vec3_t*, quaternion_t*)>();
 
-							world_setup->accumulate_pose(new_position, new_q, layer->second_dispatch_sequence, layer->cycle, layer->weight, time, world_ik);
-							copy_to_follow(bone_merge, new_position, new_q, BONE_USED_BY_BONE_MERGE, position, q);
+								copy_from_follow(bone_merge, position, q, BONE_USED_BY_BONE_MERGE, new_position, new_q);
+								if (ik_context)
+									add_dependencies(ik_context, *(float*)((std::uintptr_t)animating + 0xA14), layer->sequence, layer->cycle, poses.data(), layer->weight);
+
+								world_setup->accumulate_pose(new_position, new_q, layer->second_dispatch_sequence, layer->cycle, layer->weight, time, world_ik);
+								copy_to_follow(bone_merge, new_position, new_q, BONE_USED_BY_BONE_MERGE, position, q);
+							}
 						}
 					}
-				}
 
-				world_ik->destructor();
-				return false;
+					world_ik->destructor();
+					return false;
+				}
 			}
-		}
-		return true;
-	};
+			return true;
+		};
 
 	if (wrong_weapon())
 	{

@@ -5,13 +5,27 @@ constexpr int CACHE_SIZE = 2;
 constexpr int YAW_CACHE_SIZE = 8;
 constexpr auto MAX_TICKS = 3;
 
+struct defensive_record_t
+{
+	float sim_time;
+	int tickbase;
+	vec3_t eye_angles;
+	bool breaking_lc;
+};
+
 struct resolver_info_t
 {
 	bool resolved{};
+	bool m_was_first_bruteforce{};
+	bool m_was_second_bruteforce{};
+
 	int side{};
 
 	int legit_ticks{};
 	int fake_ticks{};
+	int player_index{};
+
+	int anim_resolve_ticks{};
 
 	INLINE void add_legit_ticks()
 	{
@@ -134,6 +148,9 @@ struct resolver_info_t
 		side = 0;
 		legit_ticks = 0;
 		fake_ticks = 0;
+		anim_resolve_ticks = 0;
+		m_was_first_bruteforce = false;
+		m_was_second_bruteforce = false;
 
 		mode = "";
 
@@ -163,6 +180,10 @@ namespace resolver
 			i.reset();
 	}
 
-	extern void prepare_side(c_cs_player* player, anim_record_t* current, anim_record_t* last);
-	extern void apply_side(c_cs_player* player, anim_record_t* current, int choke);
-}
+	bool should_resolve(c_cs_player* player, const resolver_info_t& info);
+	void prepare_side(c_cs_player* player, anim_record_t* current, anim_record_t* previous);
+	void apply_side(c_cs_player* player, anim_record_t* current, int choke);
+
+	void update_tick_count(resolver_info_t& info, anim_record_t* current);
+	bool should_apply_side(c_cs_player* player, const resolver_info_t& info);
+};
