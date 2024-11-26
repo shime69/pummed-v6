@@ -389,7 +389,18 @@ std::vector< Snowflake::Snowflake > snow;
 void c_menu::draw_snow()
 {
 
-	
+	g_render->filled_rect(0.f, 0.f, g_render->screen_size.w, g_render->screen_size.h, color{ 10, 10, 10, (int)(150 * this->alpha) });
+
+	static bool init = false;
+	if (!init)
+	{
+		Snowflake::CreateSnowFlakes(snow, 300, 5.f, 15.f, 0, 0, g_render->screen_size.w, g_render->screen_size.h, Snowflake::vec3(0.f, 0.005f));
+		init = true;
+	}
+
+	auto mouse = ImGui::GetMousePos();
+	Snowflake::Update(snow, Snowflake::vec3(mouse.x, mouse.y), Snowflake::vec3(0.f, 0.f));
+
 }
 
 void c_menu::draw()
@@ -449,19 +460,7 @@ void c_menu::draw()
 	}
 
 	ImGui::SetColorEditOptions(ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_DisplayRGB);
-	//this->draw_snow();
-	//RENDER->filled_rect(0.f, 0.f, RENDER->screen.x, RENDER->screen.y, c_color{ 10, 10, 10, (int)(150 * this->alpha) });
-
-
-	//static bool init = false;
-	//if (!init)
-	//{
-		//Snowflake::CreateSnowFlakes(snow, 300, 5.f, 25.f, 0, 0, 1920, 1080, Snowflake::vec3(0.f, 0.005f), IM_COL32(255, 255, 255, 100));
-		//init = true;
-	//}
-
-	//auto mouse = ImGui::GetMousePos();
-	//Snowflake::Update(snow, Snowflake::vec3(mouse.x, mouse.y), Snowflake::vec3(0.f, 0.f));
+	this->draw_snow();
 	this->window_begin();
 	this->draw_ui_background();
 	this->draw_tabs();
