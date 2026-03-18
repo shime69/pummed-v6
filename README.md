@@ -35,10 +35,12 @@
 
 ### Build Steps
 
+### Build Steps
+
 1. **Clone the repository with submodules**
-```bash
-git clone --recursive https://github.com/yourusername/pummed.git
-cd pummed
+   ```bash
+   git clone --recursive https://github.com/yourusername/pummed.git
+   cd pummed
 Open the solution
 
 Navigate to pummed/pummed.sln
