@@ -1,4 +1,4 @@
-# pummed - CS:GO HvH Cheat v6
+# Pummed v6 - CS:GO HvH Cheat 
 
 [![Educational Purpose Only](https://img.shields.io/badge/Purpose-Educational-blue.svg)](https://github.com/yourusername/pummed)
 [![Language](https://img.shields.io/badge/Language-C%2B%2B-00599C.svg)](https://isocpp.org/)
@@ -53,12 +53,13 @@
 
 ## ⌨️ Building via Command Line
 
+```bash
 # Using MSBuild
 msbuild pummed.sln /p:Configuration=Release /p:Platform=Win32
 
 # Using devenv
 devenv pummed.sln /Build Release
-
+```
 
 🛠️ Technologies Used
 - C++17: Modern C++ features
