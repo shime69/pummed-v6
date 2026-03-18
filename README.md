@@ -67,61 +67,42 @@ devenv pummed.sln /Build Release
 
 
 🛠️ Technologies Used
-C++17: Modern C++ features
+- C++17: Modern C++ features
 
-WinAPI: Windows system interaction
+- WinAPI: Windows system interaction
 
-DirectX 9: Rendering and overlay
+- DirectX 9: Rendering and overlay
 
-MinHook: Minimalistic x86/x64 API hooking library
+- MinHook: Minimalistic x86/x64 API hooking library
 
-Pattern Scanning: Dynamic signature scanning for offsets
-
-## 📚 Educational Concepts Demonstrated
-DLL Injection: Understanding process memory manipulation
-
-API Hooking: Intercepting game functions (CreateMove, PaintTraverse, etc.)
-
-Memory Management: Reading/writing process memory
-
-Reverse Engineering: Understanding game structures and classes
-
-Rendering Techniques: Drawing overlays with DirectX
-
-Multithreading: Managing concurrent operations
-
-Vector Mathematics: Aimbot calculations, trajectory prediction
+- Pattern Scanning: Dynamic signature scanning for offsets
 
 ## 🚫 Anti-Cheat Considerations
-This project is for educational research only. Be aware that:
+### This project is for educational research only. Be aware that:
 
-VAC (Valve Anti-Cheat) detects memory modifications
+- VAC (Valve Anti-Cheat) detects memory modifications
 
-Online use will result in permanent account bans
+- Online use will result in permanent account bans
 
-Offline mode is the only safe environment for testing
+- Offline mode is the only safe environment for testing
 
 ## 🔒 Legal & Ethical Notice
 THIS SOFTWARE IS PROVIDED FOR EDUCATIONAL PURPOSES ONLY.
 BY USING THIS SOFTWARE, YOU AGREE TO THE FOLLOWING:
 
-1. You will not use this software on VAC-secured servers
-2. You understand that using cheats violates CS:GO's Terms of Service
-3. You accept full responsibility for any consequences
-4. You will use this knowledge ethically and responsibly
-5. This project does not encourage or promote cheating in online games
+- 1. You will not use this software on VAC-secured servers
+- 2. You understand that using cheats violates CS:GO's Terms of Service
+- 3. You accept full responsibility for any consequences
+- 4. You will use this knowledge ethically and responsibly
+- 5. This project does not encourage or promote cheating in online games
 
 The authors are not responsible for any misuse of this software.
 ## 🤝 Contributing
-This is an educational project. Contributions that improve:
-
-Code quality and documentation
-
-Educational explanations
-
-Build process improvements
-
-Bug fixes
+- This is an educational project. Contributions that improve:
+- Code quality and documentation
+- Educational explanations
+- Build process improvements
+- Bug fixes
 
 are welcome. Please create a pull request with clear descriptions of changes.
 
