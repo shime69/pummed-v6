@@ -1,6 +1,6 @@
 # Pummed v6 - CS:GO HvH Cheat 
 
-[![Educational Purpose Only](https://img.shields.io/badge/Purpose-Educational-blue.svg)](https://github.com/yourusername/pummed)
+[![Educational Purpose Only](https://img.shields.io/badge/Purpose-Educational-blue.svg)](https://github.com/shime69/pummed-v6)
 [![Language](https://img.shields.io/badge/Language-C%2B%2B-00599C.svg)](https://isocpp.org/)
 [![Windows](https://img.shields.io/badge/Platform-Windows-0078D6.svg)](https://windows.com)
 
