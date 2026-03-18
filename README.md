@@ -35,12 +35,10 @@
 
 ### Build Steps
 
-### Build Steps
-
 1. **Clone the repository with submodules**
    ```bash
-   git clone --recursive https://github.com/yourusername/pummed.git
-   cd pummed
+   git clone --recursive https://github.com/shime69/pummed-v6.git
+   cd pummed-v6
 Open the solution
 
 Navigate to pummed/pummed.sln
@@ -66,24 +64,8 @@ msbuild pummed.sln /p:Configuration=Release /p:Platform=Win32
 
 # Using devenv
 devenv pummed.sln /Build Release
-📁 Project Structure
-text
-pummed/
-├── pummed/                    # Main source directory
-│   ├── src/                    # Source files
-│   │   ├── main.cpp            # DLL entry point
-│   │   ├── hooks/              # Hook implementations
-│   │   ├── features/           # Feature implementations
-│   │   ├── sdk/                 # CS:GO SDK classes
-│   │   └── utils/               # Helper utilities
-│   ├── include/                 # Header files
-│   ├── resources/               # Resources (if any)
-│   └── pummed.vcxproj           # Visual Studio project
-├── lib/                          # Third-party libraries
-│   └── MinHook/                  # Hooking library (submodule)
-├── external/                      # External dependencies
-├── pummed.sln                     # Visual Studio solution
-└── README.md                      # This file
+
+
 🛠️ Technologies Used
 C++17: Modern C++ features
 
@@ -95,7 +77,7 @@ MinHook: Minimalistic x86/x64 API hooking library
 
 Pattern Scanning: Dynamic signature scanning for offsets
 
-📚 Educational Concepts Demonstrated
+## 📚 Educational Concepts Demonstrated
 DLL Injection: Understanding process memory manipulation
 
 API Hooking: Intercepting game functions (CreateMove, PaintTraverse, etc.)
@@ -110,7 +92,7 @@ Multithreading: Managing concurrent operations
 
 Vector Mathematics: Aimbot calculations, trajectory prediction
 
-🚫 Anti-Cheat Considerations
+## 🚫 Anti-Cheat Considerations
 This project is for educational research only. Be aware that:
 
 VAC (Valve Anti-Cheat) detects memory modifications
@@ -119,8 +101,7 @@ Online use will result in permanent account bans
 
 Offline mode is the only safe environment for testing
 
-🔒 Legal & Ethical Notice
-text
+## 🔒 Legal & Ethical Notice
 THIS SOFTWARE IS PROVIDED FOR EDUCATIONAL PURPOSES ONLY.
 BY USING THIS SOFTWARE, YOU AGREE TO THE FOLLOWING:
 
@@ -131,7 +112,7 @@ BY USING THIS SOFTWARE, YOU AGREE TO THE FOLLOWING:
 5. This project does not encourage or promote cheating in online games
 
 The authors are not responsible for any misuse of this software.
-🤝 Contributing
+## 🤝 Contributing
 This is an educational project. Contributions that improve:
 
 Code quality and documentation
@@ -144,22 +125,6 @@ Bug fixes
 
 are welcome. Please create a pull request with clear descriptions of changes.
 
-📖 Resources for Learning
-UnknownCheats Forum - Game hacking community
-
-Guided Hacking - Tutorials and resources
-
-Valve Developer Community - Source SDK documentation
-
-MinHook Documentation
-
-⚖️ License
+## ⚖️ License
 This project is licensed under the MIT License - see the LICENSE file for details.
 Note: The educational purpose clause overrides any commercial implications.
-
-📞 Contact & Support
-Discord: [Server Link]
-
-Issues: GitHub Issues for technical problems only
-
-Educational questions: Open a discussion
