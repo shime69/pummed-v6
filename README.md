@@ -33,32 +33,26 @@
 - Windows SDK (10.0+)
 - Git (for cloning with submodules)
 
-### Build Steps
+## 🔧 Build Steps
 
 1. **Clone the repository with submodules**
-   ```bash
    git clone --recursive https://github.com/shime69/pummed-v6.git
    cd pummed-v6
-Open the solution
 
-Navigate to pummed/pummed.sln
+2. **Open the solution**
+   - Navigate to pummed/pummed.sln
+   - Open with Visual Studio
 
-Open with Visual Studio
+3. **Select build configuration**
+   - Release | x86 for release build
+   - Debug | x86 for debug build with symbols
 
-Select build configuration
+4. **Build the project**
+   - Press Ctrl+Shift+B or go to Build → Build Solution
+   - The compiled DLL will be in pummed/Release/ or pummed/Debug/
 
-Release | x86 for release build
+## ⌨️ Building via Command Line
 
-Debug | x86 for debug build with symbols
-
-Build the project
-
-Press Ctrl+Shift+B or go to Build → Build Solution
-
-The compiled DLL will be in pummed/Release/ or pummed/Debug/
-
-Building via Command Line
-bash
 # Using MSBuild
 msbuild pummed.sln /p:Configuration=Release /p:Platform=Win32
 
